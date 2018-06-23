@@ -11139,6 +11139,24 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 0
+--- !u!1 &882255144 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1323665567172298, guid: 37cab37b55430a449a1f83ad6a0b2a33,
+    type: 2}
+  m_PrefabInternal: {fileID: 1709311412}
+--- !u!114 &882255145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 882255144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43562b819d71b484c8a7e714d6f01391, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  btnL: {fileID: 0}
+  ProfilePic: {fileID: 2068078155}
 --- !u!1 &913893615
 GameObject:
   m_ObjectHideFlags: 0
@@ -15954,6 +15972,12 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2064366810}
+--- !u!114 &2068078155 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 114273128870102034, guid: 37cab37b55430a449a1f83ad6a0b2a33,
+    type: 2}
+  m_PrefabInternal: {fileID: 1709311412}
+  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
 --- !u!1 &2098809289
 GameObject:
   m_ObjectHideFlags: 0
