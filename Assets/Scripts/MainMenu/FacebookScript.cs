@@ -18,6 +18,12 @@ public class FacebookScript : MonoBehaviour {
 			// Already initialized, signal an app activation App Event
 			FB.ActivateApp();
 		}
+		if (FB.IsLoggedIn) {
+			FB.API ("me/picture?type=square&height=80&width=80", HttpMethod.GET, GetPicture);
+			btnL.SetActive (false);
+		} else {
+			btnL.SetActive (true);
+		}
 	}
 
 	private void InitCallback ()
