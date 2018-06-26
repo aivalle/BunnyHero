@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using TMPro;
+
 
 public class GameManager : MonoBehaviour {
 
@@ -12,10 +14,11 @@ public class GameManager : MonoBehaviour {
 
 	public GameObject PanelInfoMission;
 	public GameObject UI_user_normal;
-	public Text TextCount;
-	public Text TextDistance;
-	public Text TextDistance2;
-	public Text TextCarrots;
+	public TextMeshProUGUI TextCount;
+	public TextMeshProUGUI TextDistance;
+	public TextMeshProUGUI TextDistance2;
+	public TextMeshProUGUI TextCarrots;
+	public TextMeshProUGUI TextCountDown;
 
 
 	public Slider SliderDistance;
@@ -30,8 +33,6 @@ public class GameManager : MonoBehaviour {
 	public GameObject PanelLargeUI;
 	public GameObject PanelObjects; 
 	public GameObject ObjectPrefab; 
-
-	public Text carrotsAmount;
 
 	public Animation AnimUIUser;
 
@@ -63,8 +64,7 @@ public class GameManager : MonoBehaviour {
 	public int carrots;
 	public float time;
 	public float distance;
-	public int rewardID;
-	public int rewardQ;
+	public Dictionary <int,int> rewards = new Dictionary <int,int>();
 
 	public float clickfuel;
 	public float secondfuel;
@@ -101,10 +101,9 @@ public class GameManager : MonoBehaviour {
 		ImportantUI.SetActive (false);
 		PanelLargeUI.SetActive (false);
 		PanelInfoMission.SetActive (true);
-		UI_user_normal.SetActive (true);
+		UI_user_normal.SetActive (false);
 		Camera.main.orthographicSize = 10f;
 
-		carrotsAmount.text = UserInfo.UserI.carrots.ToString();
 		fuel = 100;
 		SliderFuel.value = fuel;
 		AnimUIUser = UI_user_normal.GetComponent<Animation>();
@@ -118,8 +117,8 @@ public class GameManager : MonoBehaviour {
 			TextDistance2.gameObject.SetActive (false);
 			SliderDistance.gameObject.SetActive(true);
 			TextDistance.gameObject.SetActive (true);
+			TextDistance.text = string.Format ("0/{0} <gradient=\"Gradient_orange\">m</gradient>",  actual_distance);
 			SliderDistance.maxValue = actual_distance;
-			TextDistance.text = "0/" + actual_distance.ToString();
 		}
 			
 		if (actual_objectsAvailable > 0) {
@@ -163,6 +162,8 @@ public class GameManager : MonoBehaviour {
 
 	public void StartMission(){
 		StartGame = true;
+		UI_user_normal.SetActive (true);
+		AnimUIUser.Play ("StartUIGame");
 	}
 
 	public void Missions_In_Game(){
@@ -175,8 +176,8 @@ public class GameManager : MonoBehaviour {
 		actual_hits = MissionInfo.MissionI.max_golpes;
 		actual_hitMode = MissionInfo.MissionI.hitMode;
 		actual_reward_exp = MissionInfo.MissionI.RewardEXP;
-		rewardID = MissionInfo.MissionI.RewardID;
-		rewardQ = MissionInfo.MissionI.RewardQ;
+		rewards = MissionInfo.MissionI.rewards;
+
 		actual_minDistance_missil = MissionInfo.MissionI.minDistance_missil;
 		actual_maxDistance_missil = MissionInfo.MissionI.maxDistance_missil;
 		actual_objectsAvailable = MissionInfo.MissionI.objectsAvaliable;
@@ -187,12 +188,10 @@ public class GameManager : MonoBehaviour {
 		GameObject actualRoom = (GameObject)Instantiate (MissionInfo.MissionI.ActualAssets[0], new Vector3(-9.5f, 0, 0), Quaternion.identity);
 		target.GetComponent<SceneCreator> ().currentRooms.Add (actualRoom);
 
-		GameObject PanelMissionInfo = PanelInfoMission;
-		PanelMissionInfo.transform.GetChild (0).GetComponent<Text> ().text = actual_mission.ToString ();
-		PanelMissionInfo.transform.GetChild (1).GetComponent<Text> ().text = string.Format("{0}\n", actual_desc);
-		PanelMissionInfo.transform.GetChild (1).GetComponent<Text> ().text += string.Format("<size=20> objetives_text:</size> \n");
-		PanelMissionInfo.transform.GetChild (1).GetComponent<Text> ().text += string.Format("En menos de <color=#ECA800>{0}</color> segundos\n", actual_time);
-		PanelMissionInfo.transform.GetChild (1).GetComponent<Text> ().text += string.Format("Recorre <color=#ECA800>{0}</color> metros\n", actual_distance);
+		PanelInfoMission.transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text =  string.Format("Misión: <gradient=\"Gradient_orange\">{0}</gradient>", actual_mission);
+		PanelInfoMission.transform.GetChild (2).GetComponent<TextMeshProUGUI> ().text = string.Format("{0}", actual_desc);
+
+		PrintObjectives (PanelInfoMission.transform.GetChild (4).gameObject, false);
 
 		if (actual_time == -1) {
 			time = 0;
@@ -201,6 +200,45 @@ public class GameManager : MonoBehaviour {
 		}
 		TextCount.text = time.ToString();
 	}
+
+	public void PrintObjectives(GameObject PanelText, bool success){
+		
+		TextMeshProUGUI InfoObjectives = PanelText.GetComponent<TextMeshProUGUI> ();
+		InfoObjectives.text = string.Format("<align=\"center\">Objetivos:</align>\n");
+		if(actual_distance > 0){
+			InfoObjectives.text += string.Format("<sprite name=\"icon_distance\"> Recorre<gradient=\"Gradient_orange\"> {0}</gradient> m.", actual_distance);
+			if(success)
+				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
+			else
+				InfoObjectives.text += "\n";
+		}
+		if (actual_hitMode == 1) {
+			InfoObjectives.text += string.Format ("<sprite name=\"icon_chicken\">Salva al menos<gradient=\"Gradient_orange\"> 1</gradient> pollo.");
+			if(success)
+				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
+			else
+				InfoObjectives.text += "\n";
+		} else if (actual_hitMode == 2) {
+			InfoObjectives.text += string.Format ("<sprite name=\"icon_chicken\">Resiste máximo<gradient=\"Gradient_orange\"> {0}</gradient> golpes.", actual_hits);
+			if(success)
+				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
+			else
+				InfoObjectives.text += "\n";
+		}
+		if (actual_time > 0) {
+			InfoObjectives.text += string.Format ("<sprite name=\"icon_clock\">Tienes<gradient=\"Gradient_orange\"> {0}</gradient> s.", actual_time);
+			if(success)
+				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
+			else
+				InfoObjectives.text += "\n";
+		} 
+
+		if (actual_objectsAvailable == 1 && success == false) {
+			InfoObjectives.text += "\n<align=\"center\"><size=85%><gradient=\"Gradient_green\">¡Objetos disponibles!</gradient></size></align>";
+		}
+
+	}
+
 
 	public void StartCountDown(bool infinite){
 
@@ -218,9 +256,7 @@ public class GameManager : MonoBehaviour {
 					time += Time.deltaTime;
 					TextCount.text = Convert.ToInt32(time).ToString();	
 				}
-
 			}
-
 		}
 	}
 
@@ -231,10 +267,10 @@ public class GameManager : MonoBehaviour {
 			distanceVar += CalcDistance;
 
 			if (actual_distance == -1) {
-				TextDistance2.GetComponent<Text> ().text = Convert.ToInt32 (distance).ToString ();
+				TextDistance2.text = string.Format ("{0} <gradient=\"Gradient_orange\">m</gradient>", Convert.ToInt32 (distance));
 			} else {
-				SliderDistance.GetComponent<Slider> ().value = distance;
-				TextDistance.GetComponent<Text> ().text = Convert.ToInt32 (distance).ToString () + "/" + actual_distance;
+				SliderDistance.value = distance;
+				TextDistance.text = string.Format ("{0}/{1} <gradient=\"Gradient_orange\">m</gradient>", Convert.ToInt32 (distance), actual_distance);
 			}
 				
 
@@ -284,7 +320,7 @@ public class GameManager : MonoBehaviour {
 		hits += hits_get; 
 		if (actual_hitMode == 1) {//Si el modo actual de choque es de pollos.
 			if (hits > 0) {
-				PollosUI.transform.GetChild (0).GetComponent<Text> ().text = string.Format ("x<color=white>{0}</color>", hits);
+				PollosUI.transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text = string.Format ("x<gradient=\"Gradient_green\">{0}</gradient>", hits);
 				if (RunGame == true) {
 					Vector2 targetV = new Vector2 (target.transform.position.x - 1f, target.transform.position.y);
 					Instantiate (PollosPrefab, targetV, Quaternion.Inverse (this.transform.rotation));
@@ -338,16 +374,35 @@ public class GameManager : MonoBehaviour {
 			Dictionary<string,object> list = new Dictionary<string,object> ();
 			list.Add ("exp", actual_reward_exp);
 			list.Add ("carrots", carrots);
-			List<int> list2 = new List<int> ();
-			list2.Add (rewardID);
-			list2.Add (rewardQ);
-			list.Add ("object", list2);
+			Dictionary<int,int> list2 = new Dictionary<int,int> ();
+
+			foreach (var rewardID in rewards) {
+				list2.Add (rewardID.Key,rewardID.Value);
+			}
+			list.Add ("objects", list2);
 			RewardSystem.RewardS.UpdateInventory (list);
 			GameOverUI.SetActive (true);
-			GameOverUI.transform.GetChild(1).gameObject.SetActive (true);
+			GameOverUI.transform.GetChild(0).gameObject.SetActive (true);
+
+			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (3).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} <sprite name=\"icon_carrot\"> {1} <gradient=\"Gradient_green\"><size=75%>EXP</size></gradient>", carrots, actual_reward_exp);
+
+			if (rewards.Count > 0) {
+				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (true);
+				ScrollSprite ImgReward = GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).transform.GetChild (1).GetComponent<ScrollSprite> ();
+				List<Sprite> listSprites = new List<Sprite> ();
+				foreach (var rewardID in rewards) {
+					listSprites.Add (ObjectsManager.ObjectsM.GetImageObject (rewardID.Key));
+				}
+				ImgReward.listSprites = listSprites;
+				ImgReward.Start();
+			} else {
+				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (false);
+			}
+
+			PrintObjectives (GameOverUI.transform.GetChild(0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (0).transform.GetChild (0).gameObject, true);
 		} else {
 			GameOverUI.SetActive (true);
-			GameOverUI.transform.GetChild(0).gameObject.SetActive (true);
+			GameOverUI.transform.GetChild(1).gameObject.SetActive (true);
 		}
 		ImportantUI.SetActive (true);
 		UI_user_normal.SetActive (false);
@@ -533,13 +588,26 @@ public class GameManager : MonoBehaviour {
 			PauseUI.SetActive (true);;
 			Debug.Log("Juego pausa");
 		} else {
-			UI_user_normal.SetActive (true);
-			ObjectsGameUI.SetActive (true);
 			ImportantUI.SetActive (false);
-			GamePause = false;
 			PauseUI.SetActive (false);
-			Debug.Log("Juego resumen");
+			StartCoroutine ("PauseCountDown",3);
 		}
+	}
+
+	public IEnumerator PauseCountDown(int duration){
+		int newtime = 0;
+		while (newtime < duration) {
+			TextCountDown.text = (duration - newtime).ToString ();
+			TextCountDown.gameObject.SetActive (true);
+			yield return new WaitForSeconds (1f);
+			TextCountDown.gameObject.SetActive (false);
+			newtime++;
+		}
+		ObjectsGameUI.SetActive (true);
+		UI_user_normal.SetActive (true);
+		AnimUIUser.Play ("StartUIGame");
+		GamePause = false;
+		Debug.Log("Juego resumen");
 	}
 
 }

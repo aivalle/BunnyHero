@@ -83,11 +83,11 @@ public class BunnyManager : MonoBehaviour {
 	//Efecto de daño aplicado a la imagen del conejo.
 	public IEnumerator Blinker(){
 		SpriteRenderer sprite = gameObject.transform.GetChild (0).GetComponent<SpriteRenderer> ();
-		sprite.color = new Color32 (255,186,186,255);
+		sprite.color = new Color32 (255,186,186,127);
 		yield return new WaitForSeconds (0.2f);
 		sprite.color =  new Color32 (255,255,255,255);
 		yield return new WaitForSeconds (0.1f);
-		sprite.color = new Color32 (255,186,186,255);
+		sprite.color = new Color32 (255,186,186,127);
 		yield return new WaitForSeconds (0.2f);
 		sprite.color = new Color32 (255,255,255,255);
 		StopCoroutine ("Blinker");
