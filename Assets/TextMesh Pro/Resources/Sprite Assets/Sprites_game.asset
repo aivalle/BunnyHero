@@ -1,0 +1,136 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 2019389346, guid: 89f0137620f6af44b9ba852b4190e64e, type: 3}
+  m_Name: Sprites_game
+  m_EditorClassIdentifier: 
+  hashCode: -1521883829
+  material: {fileID: 21507485405163368}
+  materialHashCode: 0
+  spriteSheet: {fileID: 2800000, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  spriteInfoList:
+  - id: 0
+    x: 199
+    y: 189
+    width: 49
+    height: 71
+    xOffset: 0
+    yOffset: 64
+    xAdvance: 49
+    scale: 1
+    name: icon_distance
+    hashCode: 841718231
+    unicode: 0
+    pivot: {x: -24.5, y: 35.5}
+    sprite: {fileID: 21300004, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  - id: 1
+    x: 94
+    y: 185
+    width: 82
+    height: 83
+    xOffset: -15
+    yOffset: 70
+    xAdvance: 82
+    scale: 1
+    name: icon_clock
+    hashCode: 683029372
+    unicode: 0
+    pivot: {x: -41, y: 41.5}
+    sprite: {fileID: 21300002, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  - id: 2
+    x: 17
+    y: 183
+    width: 53
+    height: 86
+    xOffset: -10
+    yOffset: 75
+    xAdvance: 53
+    scale: 1
+    name: icon_carrot
+    hashCode: 1061050157
+    unicode: 0
+    pivot: {x: -26.5, y: 43}
+    sprite: {fileID: 21300000, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  - id: 3
+    x: 10
+    y: 101
+    width: 71
+    height: 72
+    xOffset: -12
+    yOffset: 62
+    xAdvance: 71
+    scale: 1
+    name: icon_chicken
+    hashCode: 948275157
+    unicode: 0
+    pivot: {x: -35.5, y: 36}
+    sprite: {fileID: 21300006, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  - id: 4
+    x: 184
+    y: 93
+    width: 84
+    height: 84
+    xOffset: -42
+    yOffset: 42
+    xAdvance: 84
+    scale: 1
+    name: icon_fail
+    hashCode: -1801524458
+    unicode: 0
+    pivot: {x: -42, y: 42}
+    sprite: {fileID: 21300010, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  - id: 5
+    x: 91
+    y: 92
+    width: 85
+    height: 86
+    xOffset: -0.6
+    yOffset: 70
+    xAdvance: 85
+    scale: 1
+    name: icon_check
+    hashCode: 683179378
+    unicode: 0
+    pivot: {x: -42.5, y: 43}
+    sprite: {fileID: 21300008, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+  fallbackSpriteAssets: []
+--- !u!21 &21507485405163368
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: TextMeshPro/Sprite
+  m_Shader: {fileID: 4800000, guid: 3a1c68c8292caf046bd21158886c5e40, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 8462f4ec5a600cd459c8cf882c6252c0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _ColorMask: 15
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
+    - _StencilWriteMask: 255
+    - _UseUIAlphaClip: 0
+    m_Colors:
+    - _ClipRect: {r: -32767, g: -32767, b: 32767, a: 32767}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}

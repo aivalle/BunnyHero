@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.IO;
-
+using TMPro;
 
 public class MissionsManager : MonoBehaviour {
 
@@ -29,21 +29,21 @@ public class MissionsManager : MonoBehaviour {
 
 	void CreateMissions(){
 
-		//Add missions            ID, worldID, "desc",time,hits,distance, rewardexp,  rewardId, rewardQuantity, hitmode, objectsAvailable, force final rewards
+		//Add missions            ID, worldID, "desc",time,hits,distance, rewardexp,  rewards ({id,quantity}), hitmode, objectsAvailable, force final rewards
 		//WORLD 1
-		missionW1.Add( new MissionID(1,1,"mission_desc",60,3,200,100,1,1,1,0,0));
-		missionW1.Add( new MissionID(2,1,"mission_desc",-1,3,255,125,1,1,2,0,0));
-		missionW1.Add( new MissionID(3,1,"mission_desc",-1,3,260,150,2,2,1,1,0));
-		missionW1.Add( new MissionID(4,1,"mission_desc",50,3,265,150,3,2,2,1,0));
-		missionW1.Add( new MissionID(5,1,"mission_desc",-1,3,300,175,1,1,2,0,0));
+		missionW1.Add( new MissionID(1,1,"mission_desc",60,3,200,100,new Dictionary <int,int>(){{1,2}},1,0,0));
+		missionW1.Add( new MissionID(2,1,"mission_desc",-1,3,255,125,new Dictionary <int,int>(){{2,1}},2,0,0));
+		missionW1.Add( new MissionID(3,1,"mission_desc",-1,3,260,150,new Dictionary <int,int>(){{1,1},{2,1}},1,1,0));
+		missionW1.Add( new MissionID(4,1,"mission_desc",50,3,265,150,new Dictionary <int,int>(){{1,1},{2,2},{3,1}},2,1,0));
+		missionW1.Add( new MissionID(5,1,"mission_desc",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1},{3,2}},2,0,0));
 		missionW1.Sort();
 
 		//WORLD 2
-		missionW2.Add( new MissionID(1,2,"mission_desc2",60,3,250,100,2,1,1,0,0));
-		missionW2.Add( new MissionID(2,2,"mission_desc2",-1,3,255,125,2,1,2,0,0));
-		missionW2.Add( new MissionID(3,2,"mission_desc2",-1,3,260,150,2,2,1,1,0));
-		missionW2.Add( new MissionID(4,2,"mission_desc2",50,3,265,150,3,2,2,1,0));
-		missionW2.Add( new MissionID(5,2,"mission_desc2",-1,3,300,175,1,1,2,0,0));
+		missionW2.Add( new MissionID(1,2,"mission_desc2",60,3,250,100,new Dictionary <int,int>(){{1,1}},1,0,0));
+		missionW2.Add( new MissionID(2,2,"mission_desc2",-1,3,255,125,new Dictionary <int,int>(){{1,1},{3,2}},2,0,0));
+		missionW2.Add( new MissionID(3,2,"mission_desc2",-1,3,260,150,new Dictionary <int,int>(){{2,1}},1,1,0));
+		missionW2.Add( new MissionID(4,2,"mission_desc2",50,3,265,150,new Dictionary <int,int>(){{2,1}},2,1,0));
+		missionW2.Add( new MissionID(5,2,"mission_desc2",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1}},2,0,0));
 		missionW2.Sort();
 
 	}
@@ -97,37 +97,45 @@ public class MissionsManager : MonoBehaviour {
 				ScrollMissions.bttn [missions.ID - 1] = missionPrefab;
 				//Crear gameobject
 				missionPrefab.name = missions.ID.ToString ();
-				missionPrefab.transform.GetChild (2).GetComponent<MissionButton> ().missionID = missions.ID;
-				missionPrefab.transform.GetChild (0).transform.GetChild (0).GetComponent<Text> ().text = missions.ID.ToString ();
-				missionPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
-				missionPrefab.transform.GetChild (4).GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.GetImageObject (missions.reward);
 
+				missionPrefab.transform.GetChild (2).GetComponent<MissionButton> ().missionID = missions.ID;
+				missionPrefab.transform.GetChild (1).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = missions.ID.ToString ();
+				missionPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
+				ScrollSprite ImgReward = missionPrefab.transform.GetChild (0).transform.GetChild (1).GetComponent<ScrollSprite> ();
+				bool isCompleted = false;
 				if (UserInfo.UserI.missionsComplete.ContainsKey(WorldID.ToString())) {
 
-					if (UserInfo.UserI.missionsComplete [WorldID.ToString ()].Contains (missions.ID)) {
+					if (UserInfo.UserI.missionsComplete [WorldID.ToString ()].Contains (missions.ID))
+						isCompleted = true;
+					else
+						isCompleted = false;
+				} else {
+					isCompleted = false;
+				}
 
-						Debug.Log ("Mision:" + missions.ID + "- COMPLETADA -");
-						LastMissionCompleted = missions.ID;
-						missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = false;
-						missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<Text> ().text = "Completada";
-					} else {
-						if (LastMissionCompleted + 1 != missions.ID) {
-							missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = false;
-							missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<Text> ().text = "Bloqueada";
-						}
-						Debug.Log ("Mision:" + missions.ID + "- NO COMPLETADA -");
-					}
-
-
+				if (isCompleted) {
+					Debug.Log ("Mision:" + missions.ID + "- COMPLETADA -");
+					LastMissionCompleted = missions.ID;
+					missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = false;
+					missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text = "Completada";
+					ImgReward.isChecked = true;
 				} else {
 					if (LastMissionCompleted + 1 != missions.ID) {
 						missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = false;
-						missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<Text> ().text = "Bloqueada";
+						missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text = "Bloqueada";
+						ImgReward.isChecked = false;
 					}
 					Debug.Log ("Mision:" + missions.ID + "- NO COMPLETADA -");
-				}
 
-	
+					if (missions.ID < LastMissionCompleted + 3) {
+						List<Sprite> listSprites = new List<Sprite> ();
+						foreach (var rewardID in missions.rewards) {
+							listSprites.Add (ObjectsManager.ObjectsM.GetImageObject (rewardID.Key));
+						}
+						ImgReward.listSprites = listSprites;
+					}
+
+				}
 			}
 
 			for(int i = 0; i < DecorationUI.transform.childCount; i++)
@@ -173,8 +181,7 @@ public class MissionsManager : MonoBehaviour {
 			MissionInfo.MissionI.maxDistance_missil = 140;
 			MissionInfo.MissionI.minDistance_missil = 120;
 			MissionInfo.MissionI.RewardEXP =  missionI [missionarray].rewardEXP;
-			MissionInfo.MissionI.RewardID = missionI [missionarray].reward;
-			MissionInfo.MissionI.RewardQ = missionI [missionarray].rewardQ;
+			MissionInfo.MissionI.rewards = missionI [missionarray].rewards;
 			MissionInfo.MissionI.hitMode = missionI [missionarray].hitMode;
 			MissionInfo.MissionI.objectsAvaliable = missionI [missionarray].objectsAvailable;
 			MissionInfo.MissionI.final_reward = missionI [missionarray].final_reward;
