@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ShopManager : MonoBehaviour {
 
@@ -30,17 +31,17 @@ public class ShopManager : MonoBehaviour {
 				objectPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
 				objectPrefab.name = object_shop.ID.ToString();
 				objectPrefab.transform.GetChild(0).GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.images_objects [object_shop.image_index];
-				objectPrefab.transform.GetChild(1).GetComponent<Text> ().text = ObjectsManager.ObjectsM.names_objects [object_shop.name_index];
-				objectPrefab.transform.GetChild(2).GetComponent<Text> ().text = ObjectsManager.ObjectsM.desc_objects [object_shop.desc_index];
+				objectPrefab.transform.GetChild(1).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.names_objects [object_shop.name_index];
+				objectPrefab.transform.GetChild(2).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.desc_objects [object_shop.desc_index];
 				int inventory = 0;
 				if (UserInfo.UserI.objects.ContainsKey (object_shop.ID.ToString())) {
 					inventory = UserInfo.UserI.objects [object_shop.ID.ToString()];
 				}
 
 
-				objectPrefab.transform.GetChild(2).GetComponent<Text> ().text += string.Format ("\nTienes <color=#ffa500ff>{0}</color>.", inventory);
+				objectPrefab.transform.GetChild(3).GetComponent<TextMeshProUGUI> ().text = string.Format ("Tienes <color=#F2A500FF>{0}</color>.", inventory);
 
-				objectPrefab.transform.GetChild(4).GetComponent<Text> ().text = object_shop.cost_shop.ToString();
+				objectPrefab.transform.GetChild(4).GetComponent<TextMeshProUGUI> ().text = object_shop.cost_shop.ToString();
 				i++;
 			}
 		}

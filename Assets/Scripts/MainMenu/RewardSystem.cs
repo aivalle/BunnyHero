@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using TMPro;
 
 public class RewardSystem : MonoBehaviour {
 
 	public static RewardSystem RewardS;
-	public Text carrotsText;
+	public TextMeshProUGUI carrotsText;
 	private int limitFuelGame = 5;
-	public Text FuelGameTimer;
-	public Text FuelGameText;
+	public TextMeshProUGUI FuelGameTimer;
+	public TextMeshProUGUI FuelGameText;
 	public GameObject WithOutFuel;
 	private int secondsPerFuel = 60;
 
@@ -25,7 +26,7 @@ public class RewardSystem : MonoBehaviour {
 		WithOutFuel.SetActive (false);
 		CheckTimerFuelHistory ();
 		if (FuelGameText) {
-			FuelGameText.text = string.Format ("{0}/{1}", UserInfo.UserI.fuelGame, limitFuelGame);
+			FuelGameText.text = string.Format ("<gradient=\"Gradient_orange\">{0}</gradient>/{1}", UserInfo.UserI.fuelGame, limitFuelGame);
 		}
 
 		if (UserInfo.UserI.fuelGame >= limitFuelGame) {
@@ -41,7 +42,7 @@ public class RewardSystem : MonoBehaviour {
 		RewardSystem.RewardS.carrotsText.text = UserInfo.UserI.carrots.ToString();
 	}
 
-	public void CalculateObjects(int amount, int ID_object){
+	public void CalculateObjects(int ID_object, int amount){
 
 		if (ID_object != 0) {
 			string ID = ID_object.ToString ();
@@ -63,18 +64,20 @@ public class RewardSystem : MonoBehaviour {
 
 	public void UpdateInventory (Dictionary<string,object> objects, GameObject text = null){
 
-		foreach (string keyO in objects.Keys) {
+		foreach (var keyO in objects) {
 
-			switch (keyO) {
+			switch (keyO.Key) {
 			case "carrots":
-				CalculateCarrots (int.Parse(objects [keyO].ToString()));
+				CalculateCarrots (int.Parse(keyO.Value.ToString()));
 				break;
 			case "exp":
-				PlayerLevelSystem.PLevelS.ModifiEXP (int.Parse(objects [keyO].ToString()));
+				PlayerLevelSystem.PLevelS.ModifiEXP (int.Parse(keyO.Value.ToString()));
 				break;
-			case "object":
-				List<int> listv = objects [keyO] as List<int>;
-				CalculateObjects (int.Parse(listv[0].ToString()),int.Parse(listv[1].ToString()));
+			case "objects":
+				Dictionary<int,int> listv = keyO.Value as Dictionary<int,int>;
+				foreach(var reward in listv){
+					CalculateObjects (reward.Key,reward.Value);
+				}
 				break;
 			}
 		}
@@ -143,7 +146,7 @@ public class RewardSystem : MonoBehaviour {
 			} 
 
 			if (FuelGameText) {
-				FuelGameText.text = string.Format ("{0}/{1}", UserInfo.UserI.fuelGame, limitFuelGame);
+				FuelGameText.text = string.Format ("<gradient=\"Gradient_orange\">{0}</gradient>/{1}", UserInfo.UserI.fuelGame, limitFuelGame);
 			}
 			return true;
 		} else {

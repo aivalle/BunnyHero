@@ -13,13 +13,12 @@ public class MissionID : IComparable<MissionID>{
 	public int hits;
 	public int distance;
 	public int rewardEXP;
-	public int reward;
-	public int rewardQ;
+	public Dictionary <int,int> rewards = new Dictionary <int,int>();
 	public int hitMode;
 	public int objectsAvailable;
 	public int final_reward;
 
-	public MissionID(int newID, int newWorldID, string newDesc, int newTime, int newHits,int newDistance,int newRewardEXP, int newReward,  int newRewardQ, int newHitMode, int newObjectsAvailable,int newFinal_reward)
+	public MissionID(int newID, int newWorldID, string newDesc, int newTime, int newHits,int newDistance,int newRewardEXP, Dictionary <int,int> newRewards,  int newHitMode, int newObjectsAvailable,int newFinal_reward)
 	{
 		ID = newID;
 		worldID = newWorldID;
@@ -28,13 +27,12 @@ public class MissionID : IComparable<MissionID>{
 		hits = newHits;
 		distance = newDistance;
 		rewardEXP = newRewardEXP;
-		reward = newReward;
-	    rewardQ = newRewardQ;
+		rewards = newRewards;
 		hitMode = newHitMode;
 		objectsAvailable = newObjectsAvailable;
 		final_reward = newFinal_reward;
 	}
-
+		
 	public int CompareTo(MissionID other)
 	{
 		if(other == null)

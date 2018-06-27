@@ -13,8 +13,7 @@ public class MissionInfo : MonoBehaviour {
 	public int max_distance;
 	public int max_golpes;
 	public int RewardEXP;
-	public int RewardID;
-	public int RewardQ;
+	public Dictionary <int,int> rewards = new Dictionary <int,int>();
 	public int maxDistance_missil;
 	public int minDistance_missil;
 	public int hitMode;
