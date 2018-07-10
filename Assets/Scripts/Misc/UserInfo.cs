@@ -12,7 +12,7 @@ public class UserInfo : MonoBehaviour {
 	public int carrots;
 	public int fuelGame;
 	public int exp;
-	public Dictionary<string, List<int>> missionsComplete = new Dictionary<string, List<int>>();
+	public Dictionary<int, Dictionary<int,Dictionary<string,object>>> missionsComplete = new Dictionary<int, Dictionary<int,Dictionary<string,object>>>();
 	public DateTime LastFuelTimer;
 	public Dictionary<string,int> objects = new Dictionary<string, int>();
 

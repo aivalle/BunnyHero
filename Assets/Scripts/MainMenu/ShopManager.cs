@@ -31,8 +31,8 @@ public class ShopManager : MonoBehaviour {
 				objectPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
 				objectPrefab.name = object_shop.ID.ToString();
 				objectPrefab.transform.GetChild(0).GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.images_objects [object_shop.image_index];
-				objectPrefab.transform.GetChild(1).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.names_objects [object_shop.name_index];
-				objectPrefab.transform.GetChild(2).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.desc_objects [object_shop.desc_index];
+				objectPrefab.transform.GetChild(1).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.GetNameObject(object_shop.ID);
+				objectPrefab.transform.GetChild (2).GetComponent<TextMeshProUGUI> ().text = ObjectsManager.ObjectsM.GetDescObject (object_shop.ID);
 				int inventory = 0;
 				if (UserInfo.UserI.objects.ContainsKey (object_shop.ID.ToString())) {
 					inventory = UserInfo.UserI.objects [object_shop.ID.ToString()];

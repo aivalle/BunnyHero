@@ -9,17 +9,19 @@ public class ObjectID : IComparable<ObjectID>{
 	public int cost_shop;
 	public int image_index;
 	public int in_shop;
-	public int name_index;
-	public int desc_index;
+	public string name_text;
+	public string desc_text;
+	public int limit;
 
-	public ObjectID(int newID, int newCost, int newImage, int newName,int newDesc,int newIn_shop)
+	public ObjectID(int newID, int newCost, int newImage, string newName,string newDesc,int newIn_shop, int newLimit)
 	{
 		ID = newID;
 		cost_shop = newCost;
 		image_index = newImage;
-		name_index = newName;
-		desc_index = newDesc;
+		name_text = newName;
+		desc_text = newDesc;
 		in_shop = newIn_shop;
+		limit = newLimit;
 	}
 
 	public int CompareTo(ObjectID other)
@@ -30,6 +32,6 @@ public class ObjectID : IComparable<ObjectID>{
 		}
 
 		//Return
-		return ID - other.cost_shop - other.image_index - other.in_shop;
+		return ID;
 	}
 }

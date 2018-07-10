@@ -37,12 +37,7 @@ public class SceneCreator: MonoBehaviour {
 		screenWidthInPoints = height * Camera.main.aspect;
 
 	}
-
-	// Update is called once per frame
-	void Update () {
-
-	}
-
+		
 	void AddRoom(float farhtestRoomEndX)
 	{
 		//Picks a random index of the room type (Prefab) to generate.
@@ -196,8 +191,9 @@ public class SceneCreator: MonoBehaviour {
 	}
 	void FixedUpdate () 
 	{    
-		GenerateRoomIfRequired();
-
-		GenerateObjectsIfRequired();
+		if (GameManager.GameM.EndGame == false) {
+			GenerateRoomIfRequired ();
+			GenerateObjectsIfRequired ();
+		}
 	}
 }

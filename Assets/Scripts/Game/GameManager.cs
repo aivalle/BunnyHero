@@ -7,11 +7,10 @@ using TMPro;
 
 
 public class GameManager : MonoBehaviour {
-
-	//Este script es muy importante ya que es aplicado solamente para el gameplay y realiza la organización de los demás.
-
+	
 	public static GameManager GameM;
 
+	//UI Objects
 	public GameObject PanelInfoMission;
 	public GameObject UI_user_normal;
 	public TextMeshProUGUI TextCount;
@@ -19,8 +18,6 @@ public class GameManager : MonoBehaviour {
 	public TextMeshProUGUI TextDistance2;
 	public TextMeshProUGUI TextCarrots;
 	public TextMeshProUGUI TextCountDown;
-
-
 	public Slider SliderDistance;
 	public Slider SliderFuel;
 	public Slider SliderHeal;
@@ -33,19 +30,23 @@ public class GameManager : MonoBehaviour {
 	public GameObject PanelLargeUI;
 	public GameObject PanelObjects; 
 	public GameObject ObjectPrefab; 
+	public GameObject FinalMessage; 
 
 	public Animation AnimUIUser;
-
 	public GameObject PollosPrefab;
 
+	// Target
 	public GameObject target;
+	private Rigidbody2D rb;
+	public CircleCollider2D CircleColl2D;
 
+	// Game status
 	public bool StartGame;
 	public bool RunGame;
 	public bool GamePause;
 	public bool EndGame;
 
-
+	// Info mission
 	public int actual_mission;
 	public string actual_desc;
 	public float actual_time;
@@ -58,29 +59,27 @@ public class GameManager : MonoBehaviour {
 	public int actual_objectsAvailable;
 	public int actual_reward_exp;
 	public int final_reward;
+	public int actual_max_reward_user;
+	public Dictionary <int,int> rewards = new Dictionary <int,int>();
 
+	//Info actual game
 	public int hits;
 	public float fuel;
 	public int carrots;
 	public float time;
 	public float distance;
-	public Dictionary <int,int> rewards = new Dictionary <int,int>();
+	private float distanceVar;
+	public int score;
 
+	// Costs
 	public float clickfuel;
 	public float secondfuel;
-
-	private Rigidbody2D rb;
-	private CircleCollider2D CircleColl2D;
-	private float distanceVar;
 
 	// Objects variables
 	public List<int> objects_game = new List<int> ();
 	public int indexButton;
 	public int idObjRemove;
-
 	public List<int> CurrentObject = new List<int> ();
-	public GameObject shieldBunny;
-	public GameObject MagnetEffect;
 
 	void Awake(){
 		GameM = this;
@@ -91,8 +90,8 @@ public class GameManager : MonoBehaviour {
 	void Start () {
 
 		StartCoroutine(SoundManager.SoundM.MusicBackDecreaseVolume ());
-		shieldBunny.SetActive (false);
-		MagnetEffect.SetActive (false);
+		BunnyManager.BunnyM.shieldBunny.SetActive (false);
+		BunnyManager.BunnyM.MagnetEffect.SetActive (false);
 		CircleColl2D = target.GetComponent<CircleCollider2D> ();
 		rb = target.GetComponent<Rigidbody2D> ();
 		GamePause = false;
@@ -101,6 +100,7 @@ public class GameManager : MonoBehaviour {
 		ImportantUI.SetActive (false);
 		PanelLargeUI.SetActive (false);
 		PanelInfoMission.SetActive (true);
+		FinalMessage.SetActive (false);
 		UI_user_normal.SetActive (false);
 		Camera.main.orthographicSize = 10f;
 
@@ -146,9 +146,9 @@ public class GameManager : MonoBehaviour {
 	void Update () {
 		if (GamePause == false) {
 			if (actual_time == -1) {
-				StartCountDown (true);
+				StartCountTime (true);
 			} else {
-				StartCountDown (false);
+				StartCountTime (false);
 			}
 
 			if (RunGame == true) {
@@ -183,6 +183,7 @@ public class GameManager : MonoBehaviour {
 		actual_objectsAvailable = MissionInfo.MissionI.objectsAvaliable;
 		final_reward = MissionInfo.MissionI.final_reward;
 		actual_worldID = MissionInfo.MissionI.worldID;
+		actual_max_reward_user = MissionInfo.MissionI.max_reward_user;
 		target.GetComponent<SceneCreator> ().availableRooms = MissionInfo.MissionI.ActualAssets;
 
 		GameObject actualRoom = (GameObject)Instantiate (MissionInfo.MissionI.ActualAssets[0], new Vector3(-9.5f, 0, 0), Quaternion.identity);
@@ -240,14 +241,14 @@ public class GameManager : MonoBehaviour {
 	}
 
 
-	public void StartCountDown(bool infinite){
+	public void StartCountTime(bool infinite){
 
 		if (RunGame == true) {
 
 			if (actual_time <= 0 && infinite == false) {
 				TextCount.text = "0";
 				Debug.Log ("Tiempo terminado");
-				GameOver (false);
+				StartCoroutine("GameOver",false);
 			} else {
 				if (infinite == false) {
 					time -= Time.deltaTime;
@@ -275,7 +276,7 @@ public class GameManager : MonoBehaviour {
 				
 
 			if(Convert.ToInt32 (distance) >=  actual_distance && actual_distance != -1){
-				GameOver (true);
+				StartCoroutine("GameOver",true);
 			}
 
 			if (distanceVar >= 250) {
@@ -304,11 +305,12 @@ public class GameManager : MonoBehaviour {
 			fuel = 100;
 		} else if (fuel <= 0) {
 			fuel = 0;
+			BunnyManager.BunnyM.ActivateParticles (false);
 			if (BunnyManager.BunnyM.grounded == true && rb.velocity.x <= 2f) {
 				if (actual_mission == 0) {
-					GameOver (false);
+					StartCoroutine("GameOver",false);
 				} else {
-					GameOver (false);
+					StartCoroutine("GameOver",false);
 				}
 			}
 		}
@@ -328,14 +330,14 @@ public class GameManager : MonoBehaviour {
 
 			} else {
 				Debug.Log ("Golpes hechos");
-				GameOver (false);
+				StartCoroutine("GameOver",false);
 			}
 		} else { // El modo actual es de vida del vehiculo.
 			if (hits > 0) {
 				SliderHeal.value = hits;
 			} else {
 				Debug.Log ("Golpes hechos");
-				GameOver (false);
+				StartCoroutine("GameOver",false);
 			}
 		}
 
@@ -353,38 +355,69 @@ public class GameManager : MonoBehaviour {
 	}
 		
 	public void CalculateCarrotsGame(int opc){
-		int carrot = 0;
-		if (opc == 0) {//Añadir 1 zanahoria
-			carrot = 1;
+		if (RunGame) {
+			int carrot = 0;
+			if (opc == 0) {//Añadir 1 zanahoria
+				carrot = 1;
+			}
+			carrots += carrot;
+			TextCarrots.text = carrots.ToString ();
 		}
-		carrots += carrot;
-		TextCarrots.text = carrots.ToString ();
+	}
 
+	public void CalculateScore(){
+		score += (int)(distance * distance) / 1000;
+		score += (int)((time * time)+150) / 70;
+		score += (int)hits * hits * 50;
+		score += carrots * 2;
 	}
 
 
-
-	public void GameOver(bool success){
+	public IEnumerator GameOver(bool success){
+		BunnyManager.BunnyM.ActivateParticles (false);
 		EndGame = true;
 		RunGame = false;
-		SoundManager.SoundM.StartCoroutine ("MusicBackDecrease");
-
+		BunnyManager.BunnyM.Click = false;
+		StartCoroutine(SoundManager.SoundM.MusicBackDecreaseVolume ());
+		CalculateScore ();
 		if (final_reward == 1 || success) {
-			MissionsManager.MissionsM.MissionComplete (actual_mission, actual_worldID);
+			FinalMessage.SetActive (true);
+			FinalMessage.gameObject.transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} {1}", "Puntuación: ", score);
+			yield return new WaitForSeconds (1f);
+		} else {
+			BunnyManager.BunnyM.StartCoroutine ("EjectBox");
+		}
+		yield return new WaitForSeconds (0.5f);
+		CameraMovement.CameraM.Follow = false;
+		yield return new WaitForSeconds (1f);
+		FinalMessage.SetActive (false);
+		if (final_reward == 1 || success) {
+			//Give rewards
 			Dictionary<string,object> list = new Dictionary<string,object> ();
-			list.Add ("exp", actual_reward_exp);
 			list.Add ("carrots", carrots);
-			Dictionary<int,int> list2 = new Dictionary<int,int> ();
+			list.Add ("exp", actual_reward_exp);
 
+			Dictionary<int,int> list2 = new Dictionary<int,int> ();
 			foreach (var rewardID in rewards) {
 				list2.Add (rewardID.Key,rewardID.Value);
 			}
-			list.Add ("objects", list2);
-			RewardSystem.RewardS.UpdateInventory (list);
+			list.Add ("booster", list2);
+
+			if (MissionInfo.MissionI.info.ContainsKey ("timesWon")) {
+				if (Convert.ToInt32 (MissionInfo.MissionI.info ["timesWon"]) < actual_max_reward_user) {
+					RewardSystem.RewardS.UpdateInventory (list);
+				} else {
+					rewards.Clear ();
+				}
+			} else {
+				RewardSystem.RewardS.UpdateInventory (list);
+			}
+
+			//UI
 			GameOverUI.SetActive (true);
 			GameOverUI.transform.GetChild(0).gameObject.SetActive (true);
-
-			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (3).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} <sprite name=\"icon_carrot\"> {1} <gradient=\"Gradient_green\"><size=75%>EXP</size></gradient>", carrots, actual_reward_exp);
+			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (2).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0}", score);
+			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (3).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} <sprite name=\"icon_carrot\"> {1} <gradient=\"Gradient_green\"><size=75%>EXP</size></gradient>",  carrots, actual_reward_exp);
 
 			if (rewards.Count > 0) {
 				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (true);
@@ -398,12 +431,16 @@ public class GameManager : MonoBehaviour {
 			} else {
 				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (false);
 			}
-
 			PrintObjectives (GameOverUI.transform.GetChild(0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (0).transform.GetChild (0).gameObject, true);
+
+			MissionsManager.MissionsM.MissionComplete (actual_mission, actual_worldID);
+			Serializer.serializer.SaveInfo ();
 		} else {
+			SoundManager.SoundM.StartCoroutine ("MusicBackDecrease");
 			GameOverUI.SetActive (true);
 			GameOverUI.transform.GetChild(1).gameObject.SetActive (true);
 		}
+
 		ImportantUI.SetActive (true);
 		UI_user_normal.SetActive (false);
 		ObjectsGameUI.SetActive (false);
@@ -422,6 +459,11 @@ public class GameManager : MonoBehaviour {
 		}
 	}
 
+
+	public IEnumerator ShowBigMessage(){
+		yield return new WaitForSeconds (1f);
+	}
+
 	public void PrepareObjects(){
 		foreach(string obj in UserInfo.UserI.objects.Keys){
 			try{
@@ -435,117 +477,8 @@ public class GameManager : MonoBehaviour {
 					objectPrefab.transform.GetChild (0).GetComponent<Text> ().text = UserInfo.UserI.objects [obj].ToString();
 				}
 			}catch{
-				//Si se hace un error, ignorar el objto actual. Puede que no exista.
+				//Si se hace un error, ignorar el objeto actual. Puede que no exista.
 			}
-		}
-	}
-
-	// Sistema que permite el uso de los objetos en el juego.
-	public void UseObject(int ID_Object, Button button_gO = null){
-		if (button_gO != null) {
-			button_gO.interactable = false;
-		}
-		CurrentObject.Add(ID_Object);
-		if (ID_Object == 1) { //Shield bunny
-			StartCoroutine (activeShieldBunny (button_gO));
-		} else if (ID_Object == 2) {
-			StartCoroutine (activeMagnet (button_gO));
-		} else if (ID_Object == 3) {
-			StartCoroutine (activeExtraVelocity(button_gO));
-		}
-		
-	}
-
-	//OBJETO: Shield
-	public IEnumerator activeShieldBunny(Button button = null){
-		GameObject btn = button.gameObject.transform.GetChild (0).gameObject;
-		btn.SetActive (true);
-		CircleColl2D.enabled = false;
-		shieldBunny.SetActive (true);
-		float newtime = 5;
-		btn.GetComponent<Text> ().text = newtime.ToString ();
-		while (newtime > 0f) {
-			if (GamePause == false) {
-				yield return new WaitForSeconds (1f);
-				newtime--;
-				btn.GetComponent<Text> ().text = newtime.ToString ();
-			} else {
-				yield return new WaitForSeconds (1f);
-			}
-		}
-		btn.SetActive (false);
-		CircleColl2D.enabled = true;
-		shieldBunny.SetActive (false);
-		CurrentObject.Remove(1);
-		if (button != null) {
-			button.interactable = true;
-		}
-	}
-
-	//OBJETO: Extra velocity
-	public IEnumerator activeExtraVelocity(Button button = null){
-		GameObject btn = button.gameObject.transform.GetChild (0).gameObject;
-		btn.SetActive (true);
-		int adds = 0;
-		float newtime = 10;
-		while (adds < 3) {
-			BunnyManager.BunnyM.rb.AddForce (new Vector2 (1500, 280));
-			adds++;
-		}
-		btn.GetComponent<Text> ().text = newtime.ToString ();
-		while (newtime > 0f) {
-			if (GamePause == false) {
-				yield return new WaitForSeconds (1f);
-				newtime--;
-				btn.GetComponent<Text> ().text = newtime.ToString ();
-			} else {
-				yield return new WaitForSeconds (1f);
-			}
-		}
-		btn.SetActive (false);
-		CurrentObject.Remove(1);
-		if (button != null) {
-			button.interactable = true;
-		}
-	}
-
-	//OBJETO: Magnet
-	public IEnumerator activeMagnet(Button button = null){
-		GameObject btn = button.gameObject.transform.GetChild (0).gameObject;
-		btn.SetActive (true);
-		MagnetEffect.SetActive (true);
-		float newtime = 20;
-		btn.GetComponent<Text> ().text = newtime.ToString ();
-		while (newtime > 0f) {
-			if (GamePause == false) {
-				yield return new WaitForSeconds (1f);
-				newtime--;
-				btn.GetComponent<Text> ().text = newtime.ToString ();
-			} else {
-				yield return new WaitForSeconds (1f);
-			}
-		}
-		btn.SetActive (false);
-		MagnetEffect.SetActive (false);
-		CurrentObject.Remove(2);
-		if (button != null) {
-			button.interactable = true;
-		}
-	}
-
-	public IEnumerator GenericObject(float duration, int Object_ID, Button button = null){
-		float newtime = 0;
-		while (newtime < duration) {
-			if (GamePause == false) {
-				yield return new WaitForSeconds (1f);
-				newtime++;
-			} else {
-				yield return new WaitForSeconds (1f);
-			}
-		}
-		CurrentObject.Remove (Object_ID);
-		if (button != null) {
-			button.interactable = true;
 		}
 	}
 		
@@ -581,16 +514,20 @@ public class GameManager : MonoBehaviour {
 
 	public void PauseGame(bool opc){
 		if (opc == true) {
+			BunnyManager.BunnyM.Click = false;
 			ObjectsGameUI.SetActive (false);
 			UI_user_normal.SetActive (false);
 			ImportantUI.SetActive (true);
 			GamePause = true;
-			PauseUI.SetActive (true);;
+			PauseUI.SetActive (true);
 			Debug.Log("Juego pausa");
+			CameraMovement.CameraM.Follow = false;
 		} else {
+			BunnyManager.BunnyM.Click = true;
 			ImportantUI.SetActive (false);
 			PauseUI.SetActive (false);
 			StartCoroutine ("PauseCountDown",3);
+			CameraMovement.CameraM.Follow = true;
 		}
 	}
 

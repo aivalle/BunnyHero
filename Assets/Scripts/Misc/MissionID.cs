@@ -17,8 +17,9 @@ public class MissionID : IComparable<MissionID>{
 	public int hitMode;
 	public int objectsAvailable;
 	public int final_reward;
+	public int max_reward_user;
 
-	public MissionID(int newID, int newWorldID, string newDesc, int newTime, int newHits,int newDistance,int newRewardEXP, Dictionary <int,int> newRewards,  int newHitMode, int newObjectsAvailable,int newFinal_reward)
+	public MissionID(int newID, int newWorldID, string newDesc, int newTime, int newHits,int newDistance,int newRewardEXP, Dictionary <int,int> newRewards,  int newHitMode, int newObjectsAvailable,int newFinal_reward, int newMax_reward)
 	{
 		ID = newID;
 		worldID = newWorldID;
@@ -31,6 +32,7 @@ public class MissionID : IComparable<MissionID>{
 		hitMode = newHitMode;
 		objectsAvailable = newObjectsAvailable;
 		final_reward = newFinal_reward;
+		max_reward_user = newMax_reward;
 	}
 		
 	public int CompareTo(MissionID other)

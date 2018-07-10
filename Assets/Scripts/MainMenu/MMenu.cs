@@ -12,6 +12,7 @@ public class MMenu : MonoBehaviour {
 	public GameObject WindowGameMode;
 	public GameObject WindowSettings;
 	public GameObject WindowShop;
+	public GameObject WindowProfile;
 	public GameObject WindowPButtons;
 	public GameObject WindowDecoMission;
 
@@ -28,6 +29,7 @@ public class MMenu : MonoBehaviour {
 		WindowGameMode.SetActive (false);
 		WindowSettings.SetActive (false);
 		WindowShop.SetActive (false);
+		WindowProfile.SetActive (false);
 		WindowWorldMissions.SetActive (false);
 		WindowPButtons.SetActive (true);
 		ViewChanged = false;
@@ -142,6 +144,16 @@ public class MMenu : MonoBehaviour {
 			anim.Play ("WindowMissions");
 
 			ActualWindow = WindowSettings;
+			break;
+
+		case "profile":
+			WindowProfile.SetActive (true);
+			anim = WindowProfile.GetComponent<Animation> ();
+			anim ["WindowMissions"].speed = 1;
+			anim ["WindowMissions"].time = 0.0f;
+			anim.Play ("WindowMissions");
+
+			ActualWindow = WindowProfile;
 			break;
 
 		case "shop":
