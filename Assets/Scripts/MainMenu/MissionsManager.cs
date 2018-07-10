@@ -29,21 +29,21 @@ public class MissionsManager : MonoBehaviour {
 
 	void CreateMissions(){
 
-		//Add missions            ID, worldID, "desc",time,hits,distance, rewardexp,  rewards ({id,quantity}), hitmode, objectsAvailable, force final rewards
+		//Add missions            ID, worldID, "desc",time,hits,distance, rewardexp,  rewards ({id,quantity}), hitmode, objectsAvailable, force final rewards, times receive reward
 		//WORLD 1
-		missionW1.Add( new MissionID(1,1,"mission_desc",60,3,200,100,new Dictionary <int,int>(){{1,2}},1,0,0));
-		missionW1.Add( new MissionID(2,1,"mission_desc",-1,3,255,125,new Dictionary <int,int>(){{2,1}},2,0,0));
-		missionW1.Add( new MissionID(3,1,"mission_desc",-1,3,260,150,new Dictionary <int,int>(){{1,1},{2,1}},1,1,0));
-		missionW1.Add( new MissionID(4,1,"mission_desc",50,3,265,150,new Dictionary <int,int>(){{1,1},{2,2},{3,1}},2,1,0));
-		missionW1.Add( new MissionID(5,1,"mission_desc",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1},{3,2}},2,0,0));
+		missionW1.Add( new MissionID(1,1,"mission_desc",60,3,200,100,new Dictionary <int,int>(){{1,2}},1,0,0,1));
+		missionW1.Add( new MissionID(2,1,"mission_desc",-1,3,255,125,new Dictionary <int,int>(){{2,1}},2,0,0,1));
+		missionW1.Add( new MissionID(3,1,"mission_desc",-1,3,260,150,new Dictionary <int,int>(){{1,1},{2,1}},1,1,0,1));
+		missionW1.Add( new MissionID(4,1,"mission_desc",50,3,265,150,new Dictionary <int,int>(){{1,1},{2,2},{3,1}},2,1,0,1));
+		missionW1.Add( new MissionID(5,1,"mission_desc",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1},{3,2}},2,0,0,1));
 		missionW1.Sort();
 
 		//WORLD 2
-		missionW2.Add( new MissionID(1,2,"mission_desc2",60,3,250,100,new Dictionary <int,int>(){{1,1}},1,0,0));
-		missionW2.Add( new MissionID(2,2,"mission_desc2",-1,3,255,125,new Dictionary <int,int>(){{1,1},{3,2}},2,0,0));
-		missionW2.Add( new MissionID(3,2,"mission_desc2",-1,3,260,150,new Dictionary <int,int>(){{2,1}},1,1,0));
-		missionW2.Add( new MissionID(4,2,"mission_desc2",50,3,265,150,new Dictionary <int,int>(){{2,1}},2,1,0));
-		missionW2.Add( new MissionID(5,2,"mission_desc2",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1}},2,0,0));
+		missionW2.Add( new MissionID(1,2,"mission_desc2",60,3,250,100,new Dictionary <int,int>(){{1,1}},1,0,0,1));
+		missionW2.Add( new MissionID(2,2,"mission_desc2",-1,3,255,125,new Dictionary <int,int>(){{1,1},{3,2}},2,0,0,1));
+		missionW2.Add( new MissionID(3,2,"mission_desc2",-1,3,260,150,new Dictionary <int,int>(){{2,1}},1,1,0,1));
+		missionW2.Add( new MissionID(4,2,"mission_desc2",50,3,265,150,new Dictionary <int,int>(){{2,1}},2,1,0,-1));
+		missionW2.Add( new MissionID(5,2,"mission_desc2",-1,3,300,175,new Dictionary <int,int>(){{1,1},{2,1}},2,0,0,1));
 		missionW2.Sort();
 
 	}
@@ -53,19 +53,18 @@ public class MissionsManager : MonoBehaviour {
 		MissionsM = this;
 	}
 	void Start(){
-		//Missions_menu_start ();
 		CreateMissions ();
 		CheckForGameModes ();
 	}
 
 	void CheckForGameModes(){
        //Infite mode
-		if (UserInfo.UserI.missionsComplete.ContainsKey (1.ToString())) {
+		if (UserInfo.UserI.missionsComplete.ContainsKey (1)) {
 			InfiniteButton.interactable = true;
 			InfiniteButton.transform.GetChild (0).gameObject.SetActive (false);
 		}
 		//other mode
-		if (UserInfo.UserI.missionsComplete.ContainsKey (1.ToString())) {
+		if (UserInfo.UserI.missionsComplete.ContainsKey (1)) {
 			GameModeButton.interactable = true;
 			GameModeButton.transform.GetChild (0).gameObject.SetActive (false);
 		}
@@ -103,9 +102,9 @@ public class MissionsManager : MonoBehaviour {
 				missionPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
 				ScrollSprite ImgReward = missionPrefab.transform.GetChild (0).transform.GetChild (1).GetComponent<ScrollSprite> ();
 				bool isCompleted = false;
-				if (UserInfo.UserI.missionsComplete.ContainsKey(WorldID.ToString())) {
+				if (UserInfo.UserI.missionsComplete.ContainsKey(WorldID)) {
 
-					if (UserInfo.UserI.missionsComplete [WorldID.ToString ()].Contains (missions.ID))
+					if (UserInfo.UserI.missionsComplete [WorldID].ContainsKey(missions.ID))
 						isCompleted = true;
 					else
 						isCompleted = false;
@@ -116,8 +115,8 @@ public class MissionsManager : MonoBehaviour {
 				if (isCompleted) {
 					Debug.Log ("Mision:" + missions.ID + "- COMPLETADA -");
 					LastMissionCompleted = missions.ID;
-					missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = false;
-					missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text = "Completada";
+					missionPrefab.transform.GetChild (2).GetComponent<Button> ().interactable = true;
+					//missionPrefab.transform.GetChild (2).transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text = "Completada";
 					ImgReward.isChecked = true;
 				} else {
 					if (LastMissionCompleted + 1 != missions.ID) {
@@ -186,6 +185,13 @@ public class MissionsManager : MonoBehaviour {
 			MissionInfo.MissionI.objectsAvaliable = missionI [missionarray].objectsAvailable;
 			MissionInfo.MissionI.final_reward = missionI [missionarray].final_reward;
 			MissionInfo.MissionI.ActualAssets = WorldManager.WorldM.worlds [missionI [missionarray].worldID - 1].GameAssets;
+			MissionInfo.MissionI.max_reward_user = missionI [missionarray].max_reward_user;
+			if (UserInfo.UserI.missionsComplete.ContainsKey (missionI [missionarray].worldID)) {
+				if (UserInfo.UserI.missionsComplete [missionI [missionarray].worldID].ContainsKey (mission_ID)) {
+					MissionInfo.MissionI.info = UserInfo.UserI.missionsComplete [missionI [missionarray].worldID] [mission_ID];
+				}
+			}
+				
 			LevelManager.LevelM.LoadScene ("Game");
 		} 
 	}
@@ -194,17 +200,53 @@ public class MissionsManager : MonoBehaviour {
 		if (mission_ID == 0) {
 			//If mission is infinite or other game mode
 		} else {
-			List<int> newM = new  List<int>();
-			if (UserInfo.UserI.missionsComplete.ContainsKey (worldID.ToString ())) {
-				newM = UserInfo.UserI.missionsComplete [worldID.ToString ()];
-				UserInfo.UserI.missionsComplete [worldID.ToString ()].Add (mission_ID);
+			Dictionary<int,Dictionary<string,object>> newM = new Dictionary<int,Dictionary<string,object>> ();
+			Dictionary<string,object> info = new Dictionary<string,object> ();
+
+
+			info.Add ("score", GameManager.GameM.score);
+			info.Add ("timesWon", 1);
+
+			if (UserInfo.UserI.missionsComplete.ContainsKey (worldID)) {
+				if(UserInfo.UserI.missionsComplete[worldID].ContainsKey(mission_ID)){
+					AddOrUpdateInfo (UserInfo.UserI.missionsComplete [worldID] [mission_ID], info);
+				}else{
+					UserInfo.UserI.missionsComplete [worldID].Add (mission_ID,info);
+				}
 			} else {
-				newM.Add (mission_ID);
-				UserInfo.UserI.missionsComplete.Add (worldID.ToString(), newM);
+				newM.Add (mission_ID,info);
+				UserInfo.UserI.missionsComplete.Add (worldID, newM);
 			}
 
 		}
 	}
+
+	public Dictionary<string,object> AddOrUpdateInfo(Dictionary<string,object> actualDict, Dictionary<string,object> newDict){
+
+		foreach (string key in newDict.Keys) {
+			if (key == "timesWon") {
+				if (actualDict.ContainsKey (key)) {
+					actualDict [key] = Convert.ToInt32 (actualDict [key]) + Convert.ToInt32 (newDict [key]);
+				} else {
+					actualDict.Add (key, newDict [key]);
+				}
+			} else {
+				if(actualDict.ContainsKey(key)){
+					if (key == "score") {
+						if (Convert.ToInt32 (actualDict [key]) < Convert.ToInt32 (newDict [key])) {
+							actualDict [key] = newDict [key];
+						}
+					} else {
+						actualDict[key] = newDict[key];
+					}
+				}else{
+					actualDict.Add (key, newDict[key]);
+				}
+			}
+		} 
+		return actualDict;
+	}
+
 
 	public void MissionsClear(){
 		UserInfo.UserI.missionsComplete.Clear();

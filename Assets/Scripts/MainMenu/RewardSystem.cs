@@ -55,13 +55,6 @@ public class RewardSystem : MonoBehaviour {
 		}
 	}
 
-	public void FirstReward(){
-		UserInfo.UserI.carrots = 50;
-		UserInfo.UserI.fuelGame = 3;
-		UserInfo.UserI.exp = 0;
-		UserInfo.UserI.LastFuelTimer = DateTime.UtcNow;
-	}
-
 	public void UpdateInventory (Dictionary<string,object> objects, GameObject text = null){
 
 		foreach (var keyO in objects) {
@@ -73,7 +66,7 @@ public class RewardSystem : MonoBehaviour {
 			case "exp":
 				PlayerLevelSystem.PLevelS.ModifiEXP (int.Parse(keyO.Value.ToString()));
 				break;
-			case "objects":
+			case "booster":
 				Dictionary<int,int> listv = keyO.Value as Dictionary<int,int>;
 				foreach(var reward in listv){
 					CalculateObjects (reward.Key,reward.Value);
@@ -81,9 +74,6 @@ public class RewardSystem : MonoBehaviour {
 				break;
 			}
 		}
-
-		Serializer.serializer.SaveInfo ();
-
 	}
 	
 	// Update is called once per frame

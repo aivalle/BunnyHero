@@ -14,6 +14,9 @@ public class PlayerLevelSystem : MonoBehaviour {
 	public int ActualLevel;
 	public float newEXP;
 	public TextMeshProUGUI TextLevel;
+	public GameObject LevelUpUI;
+	public GameObject LevelUpImage;
+	public Sprite CarrotImg;
 
 	public int necesaryEXP;
 	public AudioClip EXPSound;
@@ -21,6 +24,11 @@ public class PlayerLevelSystem : MonoBehaviour {
 	public AudioClip EXPSound3;
 	public Animation UIEXP;
 
+	Dictionary<string, object> newObjects = new Dictionary<string, object> ();
+	private double oldLevel;
+	private double newLevel;
+
+	private bool LevelUpActivated = false;
 
 	public bool UpdateExp;
 	public bool PlaySound;
@@ -35,11 +43,13 @@ public class PlayerLevelSystem : MonoBehaviour {
 	void Start () {
 		ActualEXP = UserInfo.UserI.exp;
 		UIEXPEnable = false;
+		LevelUpUI.SetActive (false);
 		UpdateLevel (false);
 		if(StartVisibility)
 			ActivateUIEXP (true);
 		else
 			ActivateUIEXP (false);
+		
 	}
 
 
@@ -65,11 +75,118 @@ public class PlayerLevelSystem : MonoBehaviour {
 	}
 
 	public void ModifiEXP(int newExp){
+		LevelUpActivated = false;
+		List<double> aLevel = CalculateLevel (UserInfo.UserI.exp);
 		UserInfo.UserI.exp += newExp;
 		ActualEXP += newExp;
+		List<double> nLevel = CalculateLevel (UserInfo.UserI.exp);
 		StartCoroutine ("StartModif");
+		if (aLevel [0] < nLevel [0]) {
+			LevelUp (aLevel [0], nLevel [0]);
+			oldLevel = aLevel [0];
+			newLevel = nLevel [0];
+		}
 		if (UIEXPEnable == false)
 			ActivateUIEXP (true);
+	}
+
+	private void LevelUp(double oldLevel,double newLevel){
+		int carrots = 0;
+		Dictionary<string, object> objects = new Dictionary<string, object> ();
+		Dictionary<int, int> booster = new Dictionary<int, int> ();
+
+
+		for (int i = 0; i < newLevel - oldLevel; i++) {
+			carrots += 10;
+
+			if (booster.ContainsKey (1)) {
+				booster [1] += 2;
+			} else {
+				booster.Add (1, 2);
+			}
+
+			if (booster.ContainsKey (2)) {
+				booster [2] += 2;
+			} else {
+				booster.Add (2, 2);
+			}
+		}
+		if (carrots > 0) {
+			objects.Add ("carrots", carrots);
+		}
+
+		if (booster.Count > 0) {
+			objects.Add("booster",booster);
+		}
+
+		RewardSystem.RewardS.UpdateInventory (objects);
+
+		if(newObjects.ContainsKey("carrots")){
+			newObjects["carrots"] = Convert.ToInt32(newObjects["carrots"]) + carrots;
+		}else{
+			newObjects.Add ("carrots", carrots);
+		}
+			
+		Dictionary<int, int> newbooster = new Dictionary<int, int> ();
+		if (newObjects.ContainsKey ("booster")) {
+			newbooster = newObjects ["booster"] as Dictionary<int, int>;
+
+			foreach (int boost in booster.Keys) {
+				if (newbooster.ContainsKey (boost)) {
+					newbooster [boost] += booster [boost];
+				} else {
+					newbooster.Add (boost, booster [boost]);
+				}
+			}
+			newObjects ["booster"] = newbooster;
+		} else {
+			newObjects.Add ("booster", booster);
+		}
+
+
+	}
+
+	IEnumerator StartLevelUp(){
+		LevelUpUI.transform.GetChild (5).gameObject.SetActive (false);
+		LevelUpUI.transform.GetChild (4).gameObject.SetActive (false);
+		LevelUpUI.SetActive (true);
+		LevelUpUI.transform.GetChild (2).GetComponent<TextMeshProUGUI> ().text = oldLevel.ToString();
+		yield return new WaitForSeconds(0.2f);
+
+		for(int i = 0; i < LevelUpUI.transform.GetChild (4).gameObject.transform.childCount; i++)
+			Destroy(LevelUpUI.transform.GetChild (4).transform.GetChild(i).gameObject);
+		
+		foreach(var reward in newObjects){
+			switch (reward.Key) {
+			case "carrots":
+				GameObject UIRewardPrefab1 = (GameObject)Instantiate (LevelUpImage, transform.position, Quaternion.identity);
+
+				UIRewardPrefab1.transform.SetParent (LevelUpUI.transform.GetChild (4).gameObject.transform, false);
+				UIRewardPrefab1.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
+				UIRewardPrefab1.transform.GetChild (0).GetComponent<Image> ().sprite = CarrotImg;
+				UIRewardPrefab1.transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = reward.Value.ToString();
+
+				break;
+			case "booster":
+				Dictionary<int,int> listv = reward.Value as Dictionary<int,int>;
+				foreach(var booster in listv){
+					GameObject UIRewardPrefab2 = (GameObject)Instantiate (LevelUpImage, transform.position, Quaternion.identity);
+
+					UIRewardPrefab2.transform.SetParent (LevelUpUI.transform.GetChild (4).gameObject.transform,false);
+					UIRewardPrefab2.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
+					UIRewardPrefab2.transform.GetChild (0).GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.GetImageObject(booster.Key);
+					UIRewardPrefab2.transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = booster.Value.ToString();
+				}
+				break;
+			}
+
+		}
+		newObjects.Clear ();
+		yield return new WaitForSeconds(0.4f);
+		LevelUpUI.transform.GetChild (4).gameObject.SetActive (true);
+		LevelUpUI.transform.GetChild (2).GetComponent<TextMeshProUGUI> ().text = newLevel.ToString();
+		yield return new WaitForSeconds(0.2f);
+		LevelUpUI.transform.GetChild (5).gameObject.SetActive (true);
 	}
 
 	IEnumerator StartModif(){
@@ -113,6 +230,11 @@ public class PlayerLevelSystem : MonoBehaviour {
 				necesaryEXP = Convert.ToInt32 (infoExp2 [2]) - Convert.ToInt32 (infoExp2 [1]);
 				SoundManager.SoundM.StartAudio (EXPSound2, 0.5f);
 				Debug.Log ("NUEVO NIVEL!");
+
+				if (LevelUpActivated == false) {
+					LevelUpActivated = true;
+					StartCoroutine ("StartLevelUp");
+				}
 			}
 
 

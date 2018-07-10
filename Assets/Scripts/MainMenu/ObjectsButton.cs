@@ -44,7 +44,7 @@ public class ObjectsButton : MonoBehaviour {
 	}
 
 	public void ActivateObject(){
-		GameManager.GameM.UseObject (int.Parse (gameObject.name), gameObject.GetComponent<Button> ());
+		ObjectsManager.ObjectsM.UseObject (int.Parse (gameObject.name), gameObject.GetComponent<Button> ());
 	}
 		
 

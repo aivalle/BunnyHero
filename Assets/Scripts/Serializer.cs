@@ -17,6 +17,10 @@ public class Serializer : MonoBehaviour
                                                //01234567890123456789012345678901
     static readonly string JSON_ENCRYPTED_KEY = "#kJ83DAlowjkf39(#($%0_+[]:#dDA'a";
 
+	void Awake(){
+		serializer = this;
+	}
+
 	public void LoadInfo(){
 
 		string filename = Path.Combine(Application.persistentDataPath, SAVE_FILE);
@@ -43,19 +47,21 @@ public class Serializer : MonoBehaviour
 
 			Debug.Log ("Datos obtenidos");
 			}catch(Exception ex) {
-				RewardSystem.RewardS.FirstReward ();
+				FirstReward ();
 				SaveInfo ();
 			}
 		} else {
-			RewardSystem.RewardS.FirstReward ();
+			FirstReward ();
 			SaveInfo ();
 		}
 	}
 
-	void Awake(){
-		serializer = this;
+	public void FirstReward(){
+		UserInfo.UserI.carrots = 50;
+		UserInfo.UserI.fuelGame = 3;
+		UserInfo.UserI.exp = 0;
+		UserInfo.UserI.LastFuelTimer = DateTime.UtcNow;
 	}
-
 
 	public void SaveInfo(){
 
@@ -121,26 +127,37 @@ public class Serializer : MonoBehaviour
 	}
 
 
-	public static Dictionary<string, List<int>> ObjectToDictionaryAdvance(object obj)
+	public static Dictionary<int, Dictionary<int,Dictionary<string,object>>> ObjectToDictionaryAdvance(object obj)
 	{
 		if (typeof(IDictionary).IsAssignableFrom(obj.GetType()))
 		{
 			IDictionary idict = (IDictionary)obj;
 
-			Dictionary<string, List<int>> newDict = new Dictionary<string, List<int>>();
-			foreach (string key in idict.Keys)
-			{
-				//Obtener la lista de valores en key por bucle:
-				IList copy = (IList) idict[key.ToString()];
+			Dictionary<int, Dictionary<int,Dictionary<string,object>>> newDict = new Dictionary<int, Dictionary<int,Dictionary<string,object>>>();
 
-				List<int> newL = new List<int> ();
-				for (int i = 0; i < copy.Count; i++)
+			foreach (string key in idict.Keys)//Recorre mundos
+			{
+				IDictionary copy =  (IDictionary)idict[key];
+
+				Dictionary<int,Dictionary<string,object>> newL = new Dictionary<int,Dictionary<string,object>>();
+
+				foreach (string key2 in copy.Keys) //Recorre ID
 				{
-					newL.Add (int.Parse(copy [i].ToString()));
+					Dictionary<string,object> newL2 = new Dictionary<string,object> ();
+					IDictionary copy2 = (IDictionary) copy[key2]; ////////////
+
+					foreach (string key3 in copy2.Keys)//Recorrer valores como keys
+					{
+						newL2.Add (key3, copy2[key3]);
+					}
+
+					newL.Add (Int32.Parse(key2), newL2);
 				}
-				newDict.Add(key.ToString(), newL);
+
+				newDict.Add(Int32.Parse(key), newL);
 
 			}
+
 			return newDict;
 		}
 		else
@@ -159,7 +176,7 @@ public class SaveData
 	public int carrots;
 	public int fuelGame;
 	public int exp;
-	public Dictionary<string,List<int>> missionsComplete = new Dictionary<string, List<int>>();
+	public Dictionary<int, Dictionary<int,Dictionary<string,object>>> missionsComplete = new Dictionary<int, Dictionary<int,Dictionary<string,object>>>();
 	public string LastFuelTimer;
 	public Dictionary<string,int> objects = new Dictionary<string,int>();
 }

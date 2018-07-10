@@ -19,6 +19,8 @@ public class MissionInfo : MonoBehaviour {
 	public int hitMode;
 	public int objectsAvaliable;
 	public int final_reward;
+	public int max_reward_user;
+	public Dictionary <string,object> info = new Dictionary <string,object>();
 	public List<GameObject> ActualAssets = new List<GameObject>();
 
 	// Use this for initialization

@@ -89,6 +89,7 @@ public class ProjectileDragging : MonoBehaviour {
 					//Iniciar juego
 					GameManager.GameM.StartGame = false;
 					GameManager.GameM.RunGame = true;
+					BunnyManager.BunnyM.StartCoroutine ("ActivateBoxEffect");
 					Debug.Log ("Solto");
 
 					SoundManager.SoundM.StartAudio (startSound, 1f);
