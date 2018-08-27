@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Facebook.Unity;
 
 public class FacebookScript : MonoBehaviour {
@@ -36,7 +37,6 @@ public class FacebookScript : MonoBehaviour {
 		} else {
 			Debug.Log("Failed to Initialize the Facebook SDK");
 		}
-
 		if (FB.IsLoggedIn) {
 			FB.API ("me/picture?type=square&height=80&width=80", HttpMethod.GET, GetPicture);
 			btnL.SetActive (false);
@@ -65,6 +65,7 @@ public class FacebookScript : MonoBehaviour {
 		if (result.Error != null) {
 			Debug.Log (result.Error);
 		}
+		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
 //		if (FB.IsLoggedIn) {
 //			FB.API ("me/picture?type=square&height=80&width=80", HttpMethod.GET, GetPicture);
 //			btnL.SetActive (false);
