@@ -250,8 +250,8 @@ PlayerSettings:
   AndroidTargetDevice: 0
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: C:/Users/Root/Documents/GAME/Bunny Hero/user.keystore
-  AndroidKeyaliasName: 
+  AndroidKeystoreName: user.keystore
+  AndroidKeyaliasName: bunnyhero
   AndroidTVCompatibility: 0
   AndroidIsGame: 1
   AndroidEnableTango: 0
@@ -656,7 +656,7 @@ PlayerSettings:
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
     1: CROSS_PLATFORM_INPUT
-    4: CROSS_PLATFORM_INPUT;MOBILE_INPUT
+    4: CROSS_PLATFORM_INPUT;MOBILE_INPUT;NO_GPGS
     7: CROSS_PLATFORM_INPUT;MOBILE_INPUT
     14: CROSS_PLATFORM_INPUT;MOBILE_INPUT
     17: MOBILE_INPUT
