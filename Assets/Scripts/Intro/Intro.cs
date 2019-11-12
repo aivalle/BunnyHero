@@ -6,9 +6,10 @@ using System.IO;
 public class Intro : MonoBehaviour {
 
 	// Use this for initialization
-	void Start () {
-		LevelManager.LevelM.LoadScene ("Menu");
 
-	}
-
+    private void Start()
+    {
+       
+        LevelManager.LevelM.LoadScene("Menu");
+    }
 }

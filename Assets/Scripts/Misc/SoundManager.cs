@@ -26,7 +26,7 @@ public class SoundManager : MonoBehaviour {
 		AudioBackS.clip = audio;
 		AudioBackS.Play ();
 		AudioBackS.pitch = 1f;
-		if (SettingsManager.SettingsM.AmbientMusic == true) {
+		if (SettingsManager.SettingsM.AmbientMusic) {
 			AudioBackS.volume = volume;
 		}
 	}
@@ -35,7 +35,7 @@ public class SoundManager : MonoBehaviour {
 		AudioBackEXP.mute = false;
 		AudioBackEXP.clip = audio;
 		AudioBackEXP.Play ();
-		if (SettingsManager.SettingsM.SoundEffects == true) {
+		if (SettingsManager.SettingsM.SoundEffects) {
 			AudioBackEXP.volume = volume;
 		} else {
 			AudioBackEXP.volume = 0.0f;
@@ -69,9 +69,9 @@ public class SoundManager : MonoBehaviour {
 
 	}
 
-	public void MuteBackMusic(bool opcion)
+	public void MuteBackMusic(bool opc)
 	{
-		AudioBackS.mute = opcion;
+		AudioBackS.mute = opc;
 	}
 
 

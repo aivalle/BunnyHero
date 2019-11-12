@@ -41,14 +41,14 @@ public class SettingsManager : MonoBehaviour {
 	}
 
 	public void ApplyChanges(){
-		if (AmbientMusic == true) {
+		if (AmbientMusic) {
 
 			SoundManager.SoundM.AudioBackS.volume = 1;
 		} else {
 			SoundManager.SoundM.AudioBackS.volume = 0;
 		}
 
-		if (SoundEffects == true) {
+		if (SoundEffects) {
 			SoundManager.SoundM.AudioS.volume = 1;
 		} else {
 			SoundManager.SoundM.AudioS.volume = 0;

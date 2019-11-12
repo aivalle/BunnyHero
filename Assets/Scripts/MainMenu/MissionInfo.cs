@@ -6,25 +6,19 @@ public class MissionInfo : MonoBehaviour {
 
 	public static MissionInfo MissionI;
 
-	public int ActualMission;
-	public int worldID;
-	public string desc;
-	public int max_tiempo;
-	public int max_distance;
-	public int max_golpes;
-	public int RewardEXP;
-	public Dictionary <int,int> rewards = new Dictionary <int,int>();
+	public string actualMission;
 	public int maxDistance_missil;
 	public int minDistance_missil;
-	public int hitMode;
-	public int objectsAvaliable;
-	public int final_reward;
-	public int max_reward_user;
+
 	public Dictionary <string,object> info = new Dictionary <string,object>();
 	public List<GameObject> ActualAssets = new List<GameObject>();
+    public List<GameObject> ActualBackgrounds = new List<GameObject>();
 
-	// Use this for initialization
-	void Awake () {
+    public MissionID mission;
+    public List<int> objects_game = new List<int>();
+
+    // Use this for initialization
+    void Awake () {
 		MissionI = this;	
 	}
 

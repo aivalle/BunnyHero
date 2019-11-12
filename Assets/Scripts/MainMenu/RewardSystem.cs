@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using ObjectType;
 
 public class RewardSystem : MonoBehaviour {
 
@@ -31,7 +32,7 @@ public class RewardSystem : MonoBehaviour {
 
 		if (UserInfo.UserI.fuelGame >= limitFuelGame) {
 			if (FuelGameTimer) {
-				FuelGameTimer.text = "Lleno";
+				FuelGameTimer.text = Lean.Localization.LeanLocalization.GetTranslationText("%full%"); ;
 			}
 		} 
 
@@ -42,16 +43,24 @@ public class RewardSystem : MonoBehaviour {
 		RewardSystem.RewardS.carrotsText.text = UserInfo.UserI.carrots.ToString();
 	}
 
-	public void CalculateObjects(int ID_object, int amount){
+	public void CalculateObjects(int ID_object, int amount, OType type){
 
-		if (ID_object != 0) {
+		if (ID_object > 0) {
 			string ID = ID_object.ToString ();
-			if (UserInfo.UserI.objects.ContainsKey (ID)) {	
+            if (type == OType.Boost)
+            {
+                if (UserInfo.UserI.objects.ContainsKey(ID))
+                    UserInfo.UserI.objects[ID] = UserInfo.UserI.objects[ID] + amount;
+                else
+                    UserInfo.UserI.objects.Add(ID, amount);
+            }
+            else if (type == OType.Vehicle) {
+                if (UserInfo.UserI.vehicles.ContainsKey(ID))
+                    UserInfo.UserI.vehicles[ID] = UserInfo.UserI.vehicles[ID] + amount;
+                else
+                    UserInfo.UserI.vehicles.Add(ID, amount);
+            }
 
-				UserInfo.UserI.objects [ID] = UserInfo.UserI.objects [ID] + amount;
-			} else {
-				UserInfo.UserI.objects.Add (ID, amount);
-			}
 		}
 	}
 
@@ -67,12 +76,19 @@ public class RewardSystem : MonoBehaviour {
 				PlayerLevelSystem.PLevelS.ModifiEXP (int.Parse(keyO.Value.ToString()));
 				break;
 			case "booster":
-				Dictionary<int,int> listv = keyO.Value as Dictionary<int,int>;
-				foreach(var reward in listv){
-					CalculateObjects (reward.Key,reward.Value);
+				Dictionary<int,int> listO = keyO.Value as Dictionary<int,int>;
+				foreach(var reward in listO){
+					CalculateObjects (reward.Key,reward.Value, OType.Boost);
 				}
 				break;
-			}
+            case "vehicle":
+                Dictionary<int, int> listV = keyO.Value as Dictionary<int, int>;
+                foreach (var reward in listV)
+                {
+                    CalculateObjects(reward.Key, reward.Value, OType.Vehicle);
+                }
+                break;
+            }
 		}
 	}
 	

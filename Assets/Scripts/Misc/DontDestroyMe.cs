@@ -13,7 +13,7 @@ public class DontDestroyMe : MonoBehaviour {
 		{
 			var existing = _instances[ID];
 
-			// A null result indicates the other object was destoryed for some reason
+			// A null result indicates the other object was destroyed for some reason
 			if(existing != null)
 			{
 				if(ReferenceEquals(gameObject, existing)){

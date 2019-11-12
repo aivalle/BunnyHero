@@ -2,45 +2,59 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ObjectType;
 
 public class ObjectsButton : MonoBehaviour {
 	
 	public Sprite BlankSelection;
 	public int indexButton;
- 
-	public void Pushed(){
-		ShopManager.ShopM.BuyObject(int.Parse(gameObject.transform.parent.name));
-	}
+    public int ObjectID = 0;
+    public enum TypeObject {Boost, Vehicle}
+
+    public OType typeO;
+
+    public void Pushed(){
+
+        ShopManager.ShopM.BuyObject(GetComponent<ObjectsButton>().ObjectID, typeO);
+        
+    }
 
 	public void SelectObject(){
-		if(GameManager.GameM.objects_game.Contains(int.Parse (gameObject.name))){
-			GameManager.GameM.PanelLargeUI.SetActive (false);
+		if(MissionsManager.MissionsM.objects_game.Contains(int.Parse (gameObject.name))){
 		}else{
-			GameManager.GameM.PanelObjects.transform.GetChild(GameManager.GameM.indexButton).GetComponent<Image> ().sprite = gameObject.GetComponent<Image> ().sprite;
-			if (int.Parse (gameObject.name) != 0) {
-				GameManager.GameM.objects_game.Remove (int.Parse (GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).name ));
-			}
-			GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).name = gameObject.name;
-			GameManager.GameM.objects_game.Add (int.Parse (gameObject.name));
-			GameManager.GameM.PanelLargeUI.SetActive (false);
-			GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).transform.GetChild (0).gameObject.SetActive (true);
+            if (int.Parse(gameObject.name) != 0)
+            {
+                MissionsManager.MissionsM.PanelUIObjects.SetActive(true);
+                ObjectsManager.ObjectsM.InstantiateObject(int.Parse(gameObject.name), MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).gameObject);
+                //MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).GetComponent<Image> ().sprite = gameObject.GetComponent<Image> ().sprite;
+               
+                MissionsManager.MissionsM.objects_game.Remove(int.Parse(MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).name));
+
+                MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).name = gameObject.name;
+                MissionsManager.MissionsM.objects_game.Add(int.Parse(gameObject.name));
+                MissionsManager.MissionsM.PanelUIObjects.SetActive(false);
+
+                MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).transform.GetChild(0).transform.SetSiblingIndex(1);
+                MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).transform.GetChild(1).gameObject.SetActive(true);
+            }
 		}
 	}
 
 	public void OpenSelection(){
-		GameManager.GameM.PanelLargeUI.SetActive (true);
-		GameManager.GameM.indexButton = indexButton;
+        MissionsManager.MissionsM.PanelUIObjects.SetActive(true);
+        MissionsManager.MissionsM.indexButton = indexButton;
 
-		GameManager.GameM.idObjRemove = int.Parse (gameObject.name);
+        MissionsManager.MissionsM.idObjRemove = ObjectID;
 	
 	}
 
 	public void DeleteSelection(){
-		GameManager.GameM.indexButton = indexButton;
-		GameManager.GameM.objects_game.Remove (int.Parse (GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).name ));
-		GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).GetComponent<Image> ().sprite = BlankSelection;
-		GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).transform.GetChild (0).gameObject.SetActive (false);
-		GameManager.GameM.PanelObjects.transform.GetChild (GameManager.GameM.indexButton).name = "0";
+        MissionsManager.MissionsM.indexButton = indexButton;
+        MissionsManager.MissionsM.objects_game.Remove (int.Parse (MissionsManager.MissionsM.PanelObjects.transform.GetChild (MissionsManager.MissionsM.indexButton).name ));
+        Destroy(MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).transform.GetChild(0).gameObject);
+        MissionsManager.MissionsM.PanelObjects.transform.GetChild (MissionsManager.MissionsM.indexButton).transform.GetChild (1).gameObject.SetActive (false);
+        MissionsManager.MissionsM.PanelObjects.transform.GetChild(MissionsManager.MissionsM.indexButton).GetComponent<ObjectsButton>().ObjectID = 0;
+        MissionsManager.MissionsM.PanelObjects.transform.GetChild (MissionsManager.MissionsM.indexButton).name = "0";
 	}
 
 	public void ActivateObject(){

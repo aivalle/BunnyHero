@@ -20,7 +20,7 @@ public class SettingsMenu : MonoBehaviour {
 
 	// Update is called once per frame
 	public void ChangeSoundSettings (int typeSound) {
-		if (SettingsDone == true) {
+		if (SettingsDone) {
 			if (typeSound == 1) {
 
 				SettingsManager.SettingsM.AmbientMusic = !SettingsManager.SettingsM.AmbientMusic;

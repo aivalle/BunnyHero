@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour {
 	public static GameManager GameM;
 
 	//UI Objects
-	public GameObject PanelInfoMission;
+	
 	public GameObject UI_user_normal;
 	public TextMeshProUGUI TextCount;
 	public TextMeshProUGUI TextDistance;
@@ -27,13 +27,11 @@ public class GameManager : MonoBehaviour {
 	public GameObject ImportantUI;
 	public GameObject ObjectsUI;
 	public GameObject ObjectsGameUI;
-	public GameObject PanelLargeUI;
-	public GameObject PanelObjects; 
-	public GameObject ObjectPrefab; 
 	public GameObject FinalMessage; 
 
 	public Animation AnimUIUser;
 	public GameObject PollosPrefab;
+    public GameObject BackgroundsGO;
 
 	// Target
 	public GameObject target;
@@ -47,7 +45,7 @@ public class GameManager : MonoBehaviour {
 	public bool EndGame;
 
 	// Info mission
-	public int actual_mission;
+	public string actual_mission;
 	public string actual_desc;
 	public float actual_time;
 	public float actual_distance;
@@ -57,13 +55,14 @@ public class GameManager : MonoBehaviour {
 	public int actual_minDistance_missil;
 	public int actual_hitMode;
 	public int actual_objectsAvailable;
-	public int actual_reward_exp;
+	public int actual_multiplier_exp;
 	public int final_reward;
 	public int actual_max_reward_user;
 	public Dictionary <int,int> rewards = new Dictionary <int,int>();
+    public List<int> objects_game = new List<int>();
 
-	//Info actual game
-	public int hits;
+    //Info actual game
+    public int hits;
 	public float fuel;
 	public int carrots;
 	public float time;
@@ -76,10 +75,9 @@ public class GameManager : MonoBehaviour {
 	public float secondfuel;
 
 	// Objects variables
-	public List<int> objects_game = new List<int> ();
-	public int indexButton;
-	public int idObjRemove;
 	public List<int> CurrentObject = new List<int> ();
+
+	private Camera actualCamera;
 
 	void Awake(){
 		GameM = this;
@@ -88,7 +86,7 @@ public class GameManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+        actualCamera = Camera.main;
 		StartCoroutine(SoundManager.SoundM.MusicBackDecreaseVolume ());
 		BunnyManager.BunnyM.shieldBunny.SetActive (false);
 		BunnyManager.BunnyM.MagnetEffect.SetActive (false);
@@ -98,17 +96,15 @@ public class GameManager : MonoBehaviour {
 		GameOverUI.SetActive (false);
 		PauseUI.SetActive (false);
 		ImportantUI.SetActive (false);
-		PanelLargeUI.SetActive (false);
-		PanelInfoMission.SetActive (true);
 		FinalMessage.SetActive (false);
 		UI_user_normal.SetActive (false);
-		Camera.main.orthographicSize = 10f;
+		actualCamera.orthographicSize = 10f;
 
 		fuel = 100;
 		SliderFuel.value = fuel;
 		AnimUIUser = UI_user_normal.GetComponent<Animation>();
 
-		if (actual_distance == -1) {
+		if (actual_distance < 0) {
 			TextDistance2.gameObject.SetActive (true);
 			SliderDistance.gameObject.SetActive(false);
 			TextDistance.gameObject.SetActive (false);
@@ -121,12 +117,6 @@ public class GameManager : MonoBehaviour {
 			SliderDistance.maxValue = actual_distance;
 		}
 			
-		if (actual_objectsAvailable > 0) {
-			PanelObjects.SetActive (true);
-			PrepareObjects ();
-		} else {
-			PanelObjects.SetActive (false);
-		}
 
 		if (actual_hitMode == 1) {
 			PollosUI.SetActive (true);
@@ -140,18 +130,22 @@ public class GameManager : MonoBehaviour {
 		SetHits (actual_hits);
 		ChangeMissilRate (actual_minDistance_missil, actual_maxDistance_missil);
 
-	}
-	
+        SelectedObjects();
+        StartMission();
+
+    }
+
+
 	// Update is called once per frame
 	void Update () {
-		if (GamePause == false) {
-			if (actual_time == -1) {
+		if (!GamePause) {
+			if (actual_time < 0) {
 				StartCountTime (true);
 			} else {
 				StartCountTime (false);
 			}
 
-			if (RunGame == true) {
+			if (RunGame) {
 				GameManager.GameM.CalculateFuel (0);
 			}
 			CalculateDistance ();
@@ -168,33 +162,34 @@ public class GameManager : MonoBehaviour {
 
 	public void Missions_In_Game(){
 
-
-		actual_mission = MissionInfo.MissionI.ActualMission;
-		actual_desc = MissionInfo.MissionI.desc;
-		actual_time = MissionInfo.MissionI.max_tiempo;
-		actual_distance = MissionInfo.MissionI.max_distance;
-		actual_hits = MissionInfo.MissionI.max_golpes;
-		actual_hitMode = MissionInfo.MissionI.hitMode;
-		actual_reward_exp = MissionInfo.MissionI.RewardEXP;
-		rewards = MissionInfo.MissionI.rewards;
+		actual_mission = MissionInfo.MissionI.actualMission;
+		actual_desc = MissionInfo.MissionI.mission.desc;
+		actual_time = MissionInfo.MissionI.mission.time;
+		actual_distance = MissionInfo.MissionI.mission.distance;
+		actual_hits = MissionInfo.MissionI.mission.hits;
+		actual_hitMode = MissionInfo.MissionI.mission.hitMode;
+		actual_multiplier_exp = MissionInfo.MissionI.mission.multiplierEXP;
+		rewards = MissionInfo.MissionI.mission.rewards;
 
 		actual_minDistance_missil = MissionInfo.MissionI.minDistance_missil;
 		actual_maxDistance_missil = MissionInfo.MissionI.maxDistance_missil;
-		actual_objectsAvailable = MissionInfo.MissionI.objectsAvaliable;
-		final_reward = MissionInfo.MissionI.final_reward;
-		actual_worldID = MissionInfo.MissionI.worldID;
-		actual_max_reward_user = MissionInfo.MissionI.max_reward_user;
+		actual_objectsAvailable = MissionInfo.MissionI.mission.objectsAvailable;
+		final_reward = MissionInfo.MissionI.mission.final_reward;
+		actual_worldID = MissionInfo.MissionI.mission.worldID;
+		actual_max_reward_user = MissionInfo.MissionI.mission.max_reward_user;
 		target.GetComponent<SceneCreator> ().availableRooms = MissionInfo.MissionI.ActualAssets;
+        objects_game = MissionInfo.MissionI.objects_game;
+        foreach (GameObject go in MissionInfo.MissionI.ActualBackgrounds)
+        {
+            GameObject background = Instantiate(go, new Vector3(0, 0, 0), Quaternion.identity);
+            background.transform.SetParent(BackgroundsGO.transform, false);
+        }
 
-		GameObject actualRoom = (GameObject)Instantiate (MissionInfo.MissionI.ActualAssets[0], new Vector3(-9.5f, 0, 0), Quaternion.identity);
+        GameObject actualRoom = (GameObject)Instantiate (MissionInfo.MissionI.ActualAssets[0], new Vector3(-9.5f, 0, 0), Quaternion.identity);
 		target.GetComponent<SceneCreator> ().currentRooms.Add (actualRoom);
 
-		PanelInfoMission.transform.GetChild (0).GetComponent<TextMeshProUGUI> ().text =  string.Format("Misión: <gradient=\"Gradient_orange\">{0}</gradient>", actual_mission);
-		PanelInfoMission.transform.GetChild (2).GetComponent<TextMeshProUGUI> ().text = string.Format("{0}", actual_desc);
 
-		PrintObjectives (PanelInfoMission.transform.GetChild (4).gameObject, false);
-
-		if (actual_time == -1) {
+		if (actual_time < 0) {
 			time = 0;
 		} else {
 			time = actual_time;
@@ -202,55 +197,16 @@ public class GameManager : MonoBehaviour {
 		TextCount.text = time.ToString();
 	}
 
-	public void PrintObjectives(GameObject PanelText, bool success){
-		
-		TextMeshProUGUI InfoObjectives = PanelText.GetComponent<TextMeshProUGUI> ();
-		InfoObjectives.text = string.Format("<align=\"center\">Objetivos:</align>\n");
-		if(actual_distance > 0){
-			InfoObjectives.text += string.Format("<sprite name=\"icon_distance\"> Recorre<gradient=\"Gradient_orange\"> {0}</gradient> m.", actual_distance);
-			if(success)
-				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
-			else
-				InfoObjectives.text += "\n";
-		}
-		if (actual_hitMode == 1) {
-			InfoObjectives.text += string.Format ("<sprite name=\"icon_chicken\">Salva al menos<gradient=\"Gradient_orange\"> 1</gradient> pollo.");
-			if(success)
-				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
-			else
-				InfoObjectives.text += "\n";
-		} else if (actual_hitMode == 2) {
-			InfoObjectives.text += string.Format ("<sprite name=\"icon_chicken\">Resiste máximo<gradient=\"Gradient_orange\"> {0}</gradient> golpes.", actual_hits);
-			if(success)
-				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
-			else
-				InfoObjectives.text += "\n";
-		}
-		if (actual_time > 0) {
-			InfoObjectives.text += string.Format ("<sprite name=\"icon_clock\">Tienes<gradient=\"Gradient_orange\"> {0}</gradient> s.", actual_time);
-			if(success)
-				InfoObjectives.text += " <sprite name=\"icon_check\">\n";
-			else
-				InfoObjectives.text += "\n";
-		} 
-
-		if (actual_objectsAvailable == 1 && success == false) {
-			InfoObjectives.text += "\n<align=\"center\"><size=85%><gradient=\"Gradient_green\">¡Objetos disponibles!</gradient></size></align>";
-		}
-
-	}
-
-
 	public void StartCountTime(bool infinite){
 
-		if (RunGame == true) {
+		if (RunGame) {
 
-			if (actual_time <= 0 && infinite == false) {
+			if (actual_time <= 0 && !infinite) {
 				TextCount.text = "0";
 				Debug.Log ("Tiempo terminado");
 				StartCoroutine("GameOver",false);
 			} else {
-				if (infinite == false) {
+				if (!infinite) {
 					time -= Time.deltaTime;
 					TextCount.text = Convert.ToInt32(time).ToString();	
 				}else{
@@ -262,7 +218,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void CalculateDistance(){
-		if (RunGame == true) {
+		if (RunGame) {
 			float CalcDistance = Time.deltaTime * rb.velocity.x * 0.35f;
 			distance += CalcDistance;
 			distanceVar += CalcDistance;
@@ -305,13 +261,9 @@ public class GameManager : MonoBehaviour {
 			fuel = 100;
 		} else if (fuel <= 0) {
 			fuel = 0;
-			BunnyManager.BunnyM.ActivateParticles (false);
-			if (BunnyManager.BunnyM.grounded == true && rb.velocity.x <= 2f) {
-				if (actual_mission == 0) {
+			BunnyManager.BunnyM.vehicleInfo.ActivateEffect(false);
+            if (BunnyManager.BunnyM.grounded == true && rb.velocity.x <= 2f) {
 					StartCoroutine("GameOver",false);
-				} else {
-					StartCoroutine("GameOver",false);
-				}
 			}
 		}
 			
@@ -374,8 +326,8 @@ public class GameManager : MonoBehaviour {
 
 
 	public IEnumerator GameOver(bool success){
-		BunnyManager.BunnyM.ActivateParticles (false);
-		EndGame = true;
+		BunnyManager.BunnyM.vehicleInfo.ActivateEffect(false);
+        EndGame = true;
 		RunGame = false;
 		BunnyManager.BunnyM.Click = false;
 		StartCoroutine(SoundManager.SoundM.MusicBackDecreaseVolume ());
@@ -387,15 +339,17 @@ public class GameManager : MonoBehaviour {
 		} else {
 			BunnyManager.BunnyM.StartCoroutine ("EjectBox");
 		}
-		yield return new WaitForSeconds (0.5f);
+		yield return new WaitForSeconds (0.25f);
 		CameraMovement.CameraM.Follow = false;
 		yield return new WaitForSeconds (1f);
 		FinalMessage.SetActive (false);
+
+		double actual_exp = score * 0.1 * actual_multiplier_exp;
 		if (final_reward == 1 || success) {
 			//Give rewards
 			Dictionary<string,object> list = new Dictionary<string,object> ();
 			list.Add ("carrots", carrots);
-			list.Add ("exp", actual_reward_exp);
+			list.Add ("exp", (int)actual_exp);
 
 			Dictionary<int,int> list2 = new Dictionary<int,int> ();
 			foreach (var rewardID in rewards) {
@@ -404,7 +358,7 @@ public class GameManager : MonoBehaviour {
 			list.Add ("booster", list2);
 
 			if (MissionInfo.MissionI.info.ContainsKey ("timesWon")) {
-				if (Convert.ToInt32 (MissionInfo.MissionI.info ["timesWon"]) < actual_max_reward_user) {
+				if (Convert.ToInt32 (MissionInfo.MissionI.info ["timesWon"]) < actual_max_reward_user || actual_max_reward_user == -1) {
 					RewardSystem.RewardS.UpdateInventory (list);
 				} else {
 					rewards.Clear ();
@@ -417,22 +371,24 @@ public class GameManager : MonoBehaviour {
 			GameOverUI.SetActive (true);
 			GameOverUI.transform.GetChild(0).gameObject.SetActive (true);
 			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (2).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0}", score);
-			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (3).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} <sprite name=\"icon_carrot\"> {1} <gradient=\"Gradient_green\"><size=75%>EXP</size></gradient>",  carrots, actual_reward_exp);
+			GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (3).transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = string.Format ("{0} <sprite name=\"icon_carrot\"> {1} <gradient=\"Gradient_green\"><size=75%>EXP</size></gradient>",  carrots, (int)actual_exp);
 
-			if (rewards.Count > 0) {
+            GameOverUI.transform.GetChild(0).transform.GetChild(0).transform.GetChild(4).transform.GetChild(0).transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = MissionInfo.MissionI.mission.toStringObjectives(true);
+
+
+            if (rewards.Count > 0) {
 				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (true);
 				ScrollSprite ImgReward = GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).transform.GetChild (1).GetComponent<ScrollSprite> ();
-				List<Sprite> listSprites = new List<Sprite> ();
+				List<GameObject> listSprites = new List<GameObject> ();
 				foreach (var rewardID in rewards) {
-					listSprites.Add (ObjectsManager.ObjectsM.GetImageObject (rewardID.Key));
+					listSprites.Add (ObjectsManager.ObjectsM.InstantiateObject(rewardID.Key, ImgReward.gameObject, rewardID.Value));
 				}
 				ImgReward.listSprites = listSprites;
 				ImgReward.Start();
 			} else {
 				GameOverUI.transform.GetChild (0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (1).gameObject.SetActive (false);
 			}
-			PrintObjectives (GameOverUI.transform.GetChild(0).transform.GetChild (0).transform.GetChild (4).transform.GetChild (0).transform.GetChild (0).gameObject, true);
-
+			
 			MissionsManager.MissionsM.MissionComplete (actual_mission, actual_worldID);
 			Serializer.serializer.SaveInfo ();
 		} else {
@@ -452,8 +408,8 @@ public class GameManager : MonoBehaviour {
 			if (objects_game[i] > 0) {
 				Transform newobj = ObjectsGameUI.transform.GetChild (i);
 				newobj.gameObject.SetActive (true);
-				newobj.GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.GetImageObject (int.Parse(obj.ToString()));
-				newobj.name = obj.ToString();
+                ObjectsManager.ObjectsM.InstantiateObject(int.Parse(obj.ToString()), newobj.gameObject);
+                newobj.name = obj.ToString();
 				i++;
 			}
 		}
@@ -464,31 +420,12 @@ public class GameManager : MonoBehaviour {
 		yield return new WaitForSeconds (1f);
 	}
 
-	public void PrepareObjects(){
-		foreach(string obj in UserInfo.UserI.objects.Keys){
-			try{
-				if (UserInfo.UserI.objects[obj] > 0 && ObjectsManager.ObjectsM.objects[int.Parse(obj) -1] != null) {
-
-					GameObject objectPrefab = (GameObject)Instantiate (ObjectPrefab, transform.position, Quaternion.identity);
-					objectPrefab.transform.SetParent (ObjectsUI.transform);
-					objectPrefab.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
-					objectPrefab.name = obj;
-					objectPrefab.GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.GetImageObject (int.Parse(obj));
-					objectPrefab.transform.GetChild (0).GetComponent<Text> ().text = UserInfo.UserI.objects [obj].ToString();
-				}
-			}catch{
-				//Si se hace un error, ignorar el objeto actual. Puede que no exista.
-			}
-		}
-	}
-		
-
 	//Permite hacer un zoomOut cuando empieza la partida.
 	public void IncreaseCameraSize(){
 
-		if(Camera.main.orthographicSize < 15 && RunGame == true){
+		if(actualCamera.orthographicSize < 15 && RunGame){
 			float pointpersecond = 2.5f;
-			Camera.main.orthographicSize += pointpersecond * Time.deltaTime;
+			actualCamera.orthographicSize += pointpersecond * Time.deltaTime;
 		}
 	}
 		
@@ -513,7 +450,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void PauseGame(bool opc){
-		if (opc == true) {
+		if (opc) {
 			BunnyManager.BunnyM.Click = false;
 			ObjectsGameUI.SetActive (false);
 			UI_user_normal.SetActive (false);

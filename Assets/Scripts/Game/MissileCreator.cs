@@ -6,14 +6,14 @@ public class MissileCreator : MonoBehaviour {
 
 	private float screenWidthInPoints;
 	public Indicator arrowIndicator;
-
+    public GameObject target;
 	public GameObject[] availableObjects;    
 	public List<GameObject> objects;
 
 	public float objectsMinDistance = 5.0f;    
 	public float objectsMaxDistance = 10.0f;
 
-	public float objectsMinY = -1.4f;
+    public float objectsMinY = -1.4f;
 	public float objectsMaxY = 1.4f;
 
 	public float objectsMinRotation = -45.0f;
@@ -24,8 +24,7 @@ public class MissileCreator : MonoBehaviour {
 
 		float height = 2.0f * Camera.main.orthographicSize;
 		screenWidthInPoints = height * Camera.main.aspect;
-
-	}
+    }
 
 	void AddObject(float lastObjectX)
 	{
@@ -39,12 +38,12 @@ public class MissileCreator : MonoBehaviour {
 		arrow.gameObject.transform.localScale = new Vector2 (0, 0);
 		arrow.target = obj;
 
+        //Sets the object’s position, using a random interval and a random height. This is controlled by script 
+        //parameters.
+        objectsMinY = target.transform.position.y;
+        objectsMaxY = target.transform.position.y + 0.4f;
 
-
-
-		//Sets the object’s position, using a random interval and a random height. This is controlled by script 
-		//parameters.
-		float objectPositionX = lastObjectX + Random.Range(objectsMinDistance, objectsMaxDistance);
+        float objectPositionX = lastObjectX + Random.Range(objectsMinDistance, objectsMaxDistance);
 		float randomY = Random.Range(objectsMinY, objectsMaxY);
 		obj.transform.position = new Vector3(objectPositionX,randomY,0); 
 
@@ -102,7 +101,7 @@ public class MissileCreator : MonoBehaviour {
 
 	void FixedUpdate () 
 	{    
-		if(GameManager.GameM.RunGame == true){
+		if(GameManager.GameM.RunGame){
 			GenerateObjectsIfRequired();
 		}
 	}

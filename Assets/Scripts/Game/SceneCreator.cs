@@ -191,7 +191,7 @@ public class SceneCreator: MonoBehaviour {
 	}
 	void FixedUpdate () 
 	{    
-		if (GameManager.GameM.EndGame == false) {
+		if (!GameManager.GameM.EndGame) {
 			GenerateRoomIfRequired ();
 			GenerateObjectsIfRequired ();
 		}

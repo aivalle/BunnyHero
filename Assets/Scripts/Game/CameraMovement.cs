@@ -13,6 +13,7 @@ public class CameraMovement : MonoBehaviour {
 
 	private Vector3 velocity = Vector3.zero;
 	private Camera ActualCamera;
+
 	void Awake(){
 		CameraM = this;
 	}
@@ -25,14 +26,14 @@ public class CameraMovement : MonoBehaviour {
 
 	void FixedUpdate()
 	{
-		if ( GameManager.GameM.RunGame == true ||  GameManager.GameM.EndGame == true ) { //Si el juego esta en curso entonces el movimiento de la camara tiene un retroseso menor.
+		if (GameManager.GameM.RunGame || GameManager.GameM.EndGame) { //Si el juego esta en curso entonces el movimiento de la camara tiene un retroseso menor.
 			dampTime = 0.1f;
-		}else{
+		} else {
 			dampTime = 2.5f;
 		}
 
-		if (targetP) { //Si el juego no esta en pausa 
-			if(Follow == true){
+		if (targetP) {
+			if(Follow){
 				//Sistema que permite el movimiento de la camara al objetivo dado:
 				Vector3 aheadPoint = targetP.localPosition + new Vector3 (10f, 0, 0);
 				Vector3 point = ActualCamera.WorldToViewportPoint (aheadPoint);

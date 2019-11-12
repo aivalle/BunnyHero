@@ -15,9 +15,13 @@ public class MMenu : MonoBehaviour {
 	public GameObject WindowProfile;
 	public GameObject WindowPButtons;
 	public GameObject WindowDecoMission;
+    public GameObject WindowMissionInfo;
 
-	public GameObject ActualWindow;
-	public AudioClip MenuSound;
+    public List<GameObject> listWindows;
+
+    public GameObject ActualWindow;
+    public GameObject Logo;
+    public AudioClip MenuSound;
 
 	public bool ViewChanged;
 	void Awake () {
@@ -31,147 +35,138 @@ public class MMenu : MonoBehaviour {
 		WindowShop.SetActive (false);
 		WindowProfile.SetActive (false);
 		WindowWorldMissions.SetActive (false);
-		WindowPButtons.SetActive (true);
+        WindowMissionInfo.SetActive(false);
+        WindowPButtons.SetActive (true);
+
 		ViewChanged = false;
 
 		SoundManager.SoundM.StartBackAudio (MenuSound, 0.6f);
 	}
-	
-	// Update is called once per frame
-	void ChangeViewCamera (bool opc) {
-		if (opc == true) {
-			Animation anim  = WindowDecoMission.GetComponent<Animation> ();
-			Animation camera = Camera.main.GetComponent<Animation> ();
-
-			anim ["decorationUIM"].speed = 1;
-			anim ["decorationUIM"].time = 0.0f;
-			anim.Play ("decorationUIM");
-
-			camera ["CameraMoveDown"].speed = 1;
-			camera ["CameraMoveDown"].time = 0.0f;
-			camera.Play ("CameraMoveDown");
-
-			ViewChanged = true;
-
-			WindowPButtons.SetActive (false);
-
-		} else {
-			Animation anim  = WindowDecoMission.GetComponent<Animation> ();
-			Animation camera = Camera.main.GetComponent<Animation> ();
-
-			anim ["decorationUIM"].speed = -1;
-			anim ["decorationUIM"].time = anim ["decorationUIM"].length;
-			anim.Play ("decorationUIM");
-
-			camera ["CameraMoveDown"].speed = -1;
-			camera ["CameraMoveDown"].time = camera ["CameraMoveDown"].length;
-			camera.Play ("CameraMoveDown");
-
-			ViewChanged = false;
-		}
-	}
 
 	public void Buttom_Do(string show_menu)
 	{
-		Animation anim;
 		Debug.Log ("Abriendo menú... " + show_menu);
 		if (ActualWindow) {
-			anim = ActualWindow.GetComponent<Animation> ();
-		
-				anim ["WindowMissions"].speed = -1;
-				anim ["WindowMissions"].time = anim ["WindowMissions"].length;
-				anim.Play ("WindowMissions");
+
+            AnimateWindow(ActualWindow, true);
 
 		}
 		if (PlayerLevelSystem.PLevelS.UIEXPEnable == true)
 			PlayerLevelSystem.PLevelS.ActivateUIEXP (false);
 
-		if (ViewChanged == true) {
-			ChangeViewCamera (false);
-		}
+        if (show_menu == "back" && listWindows.Count <= 1)
+        {
+            this.Buttom_Do("close_all");
+            WindowPButtons.SetActive(true);
+        }
+        else
+            WindowPButtons.SetActive(false);
 
-		switch (show_menu)
+       switch (show_menu)
 		{
 		case "mode_games":
-			
-			WindowGameMode.SetActive (true);
-			anim = WindowGameMode.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
-
-
-			ActualWindow = WindowGameMode;
-			break;
+                AnimateWindow(WindowGameMode, false);
+                ActualWindow = WindowGameMode;
+			    break;
 
 		case "world_select":
-			WindowWorldMissions.SetActive (true);
-			anim =  WindowWorldMissions.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
-			ActualWindow = WindowWorldMissions;
-			WindowPButtons.SetActive (false);
-			break;
+
+                AnimateWindow(WindowWorldMissions, false);
+                ActualWindow = WindowWorldMissions;
+			    WindowPButtons.SetActive (false);
+			    break;
 
 
 		case "missions":
-			WindowMissions.SetActive (true);
-			anim = WindowMissions.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
-
-			ChangeViewCamera (true);
-
-			MissionsManager.MissionsM.ScrollMissions.Gotobutton (MissionsManager.MissionsM.LastMissionCompleted);
-			ActualWindow = WindowMissions;
-			break;
+                AnimateWindow(WindowMissions, false);
+                MissionsManager.MissionsM.ChangeViewCamera (true);
+			    ActualWindow = WindowMissions;
+			    break;
 
 
 		case "close_all":
-			if (PlayerLevelSystem.PLevelS.UIEXPEnable == false)
-				PlayerLevelSystem.PLevelS.ActivateUIEXP (true);
-			ActualWindow = null;
-			WindowPButtons.SetActive (true);
-			break;
+			    if (PlayerLevelSystem.PLevelS.UIEXPEnable == false)
+				    PlayerLevelSystem.PLevelS.ActivateUIEXP (true);
+			    ActualWindow = null;
+			    WindowPButtons.SetActive (true);
+                listWindows.Clear();
+                Logo.GetComponent<AnimatorSetValues>().ToggleBoolLogo(true);
+                MissionsManager.MissionsM.ChangeViewCamera(false);
+                break;
 
 		case "settings":
-			WindowSettings.SetActive (true);
-			anim = WindowSettings.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
-
-			ActualWindow = WindowSettings;
-			break;
+                AnimateWindow(WindowSettings, false);
+                ActualWindow = WindowSettings;
+			    break;
 
 		case "profile":
-			WindowProfile.SetActive (true);
-			anim = WindowProfile.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
-
-			ActualWindow = WindowProfile;
-			break;
+                AnimateWindow(WindowProfile, false);
+                ActualWindow = WindowProfile;
+			    break;
 
 		case "shop":
-			WindowShop.SetActive (true);
-			anim = WindowShop.GetComponent<Animation> ();
-			anim ["WindowMissions"].speed = 1;
-			anim ["WindowMissions"].time = 0.0f;
-			anim.Play ("WindowMissions");
+                AnimateWindow(WindowShop, false);
+                ActualWindow = WindowShop;
+			    break;
 
-			ActualWindow = WindowShop;
-			break;
+        case "mission_info":
+                AnimateWindow(WindowMissionInfo, false);
+                ActualWindow = WindowMissionInfo;
 
+                break;
 
-		default:
+        case "back":
+
+                bool fixedWindows = false;
+                if (listWindows.Count > 1) {
+                    if (ActualWindow != listWindows[listWindows.Count - 1]) {
+                        listWindows.Remove(ActualWindow);
+                        AnimateWindow(listWindows[listWindows.Count - 1], false);
+                        ActualWindow = listWindows[listWindows.Count - 1];
+                        fixedWindows = true;
+                    }
+                    else
+                    {
+                        AnimateWindow(listWindows[listWindows.Count - 2], false);
+                        ActualWindow = listWindows[listWindows.Count - 2];
+                    }
+                }
+                if (!fixedWindows)
+                {
+                    if (listWindows.Count > 0)
+                        listWindows.RemoveAt(listWindows.Count - 1);
+                    else
+                        listWindows.Clear();
+                }
+
+                if (show_menu != "mission_info" && !listWindows.Contains(WindowMissionInfo) && !listWindows.Contains(WindowMissions))
+                {
+                    MissionsManager.MissionsM.ChangeViewCamera(false);
+                }
+                break;
+
+        default:
 			Debug.Log("No se encuentra el menu " + show_menu);
 			break;
 		}
-			
-	}
+        if(!listWindows.Contains(ActualWindow) && show_menu != "back" && show_menu != "close_all")
+            listWindows.Add(ActualWindow);
+    }
+
+    void AnimateWindow(GameObject window, bool close) {
+        Animation anim;
+        anim = window.GetComponent<Animation>();
+        if (close) {
+            anim["WindowMissions"].speed = -1;
+            anim["WindowMissions"].time = anim["WindowMissions"].length;
+        } else {
+            window.transform.parent.gameObject.SetActive(true);
+            window.SetActive(true);
+            anim["WindowMissions"].speed = 1;
+            anim["WindowMissions"].time = 0.0f;
+
+        }
+        anim.Play("WindowMissions");
+    }
 		
 }

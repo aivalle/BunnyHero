@@ -49,13 +49,13 @@ public class MoveCamera : MonoBehaviour {
 			transform.position = ResetCamera;
 		}
 
-		if(Stop = true && ActualPositionX < MinDistanceX){
+		if(Stop && ActualPositionX < MinDistanceX){
 			float newX = Mathf.Lerp (transform.position.x, MinDistanceX + 0.1f, Time.deltaTime * 10f);
 			Vector3 newPosition = new Vector3 (newX, 0,-10f);
 			transform.position = newPosition;
 			Stop = false;
 		}
-		if (Stop = true && ActualPositionX > MaxDistanceX){
+		if (Stop && ActualPositionX > MaxDistanceX){
 			float newX = Mathf.Lerp (transform.position.x, MaxDistanceX - 0.1f, Time.deltaTime * 10f);
 			Vector3 newPosition = new Vector3 (newX, 0,-10f);
 			transform.position = newPosition;
@@ -65,7 +65,6 @@ public class MoveCamera : MonoBehaviour {
 	// return the position of the mouse in world coordinates (helper method)
 	Vector3 MousePos()
 	{
-		
 		return Camera.main.ScreenToWorldPoint(Input.mousePosition);
 	}
 }

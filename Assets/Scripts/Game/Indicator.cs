@@ -21,12 +21,12 @@ public class Indicator : MonoBehaviour {
 	void PositionArrow()
 	{
 		//Sistema que permite mover el indicador atraves de los bordes de la pantalla:
-		transform.localScale = new Vector2(0,0);
 		Vector3 Pos = ActualCamera.WorldToViewportPoint(target.transform.position);
 
-
-		if (Pos.x >= 0.0f && Pos.x <= 1.0f && Pos.y >= 0.0f && Pos.y <= 1.0f) // Si el objetivo es visible entonces no continua apareciendo.
+		if (Pos.x >= 0.0f && Pos.x <= 1.0f && Pos.y >= 0.0f && Pos.y <= 1.0f) { // Si el objetivo es visible entonces no continua apareciendo.
+			transform.localScale = new Vector2(0,0);
 			return;
+		}
 
 		transform.localScale = new Vector2(1,1);
 		Pos.x -= 0.5f;  

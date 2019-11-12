@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.UI;
+using TMPro;
+using ObjectType;
 
 public class ObjectsManager : MonoBehaviour {
 
@@ -13,9 +15,14 @@ public class ObjectsManager : MonoBehaviour {
 
 	public List<ObjectID> vehicles = new List<ObjectID>();
 
-	public List<Sprite> images_objects; 
+	public List<GameObject> images_objects;
+    public List<GameObject> images_vehicles;
 
-	void Awake () {
+    public List<GameObject> images_vehicles_inGame;
+
+    public GameObject DefaultCarrots;
+
+    void Awake () {
 		ObjectsM = this;
 	}
 
@@ -25,9 +32,12 @@ public class ObjectsManager : MonoBehaviour {
 		objects.Add( new ObjectID(2,20,1,"object_2","desc_object_2",1,-1));
 		objects.Add( new ObjectID(3,15,2,"object_3","desc_object_3",1,-1));
 
-	}
+        vehicles.Add(new ObjectID(1, 100, 0, "vehicle_1", "desc_vehicle_1", 1, 1));
+        vehicles.Add(new ObjectID(2, 200, 1, "vehicle_2", "desc_vehicle_2", 1, 1));
 
-	public string GetDescObject(int ID){
+    }
+
+	public string GetDescObject(int ID, bool vehicle = false){
 		return objects[ID-1].desc_text;
 	}
 
@@ -35,13 +45,102 @@ public class ObjectsManager : MonoBehaviour {
 		return objects[ID-1].name_text;
 	}
 
-	public Sprite GetImageObject(int ID){
-		return images_objects [objects[ID-1].image_index];
+	public GameObject GetImageObject(int ID){
+        return images_objects [objects[ID-1].image_index];
+
 	}
 
+    public string GetDescVehicle(int ID, bool vehicle = false)
+    {
+        return vehicles[ID - 1].desc_text;
+    }
 
-	// Sistema que permite el uso de los objetos en el juego.
-	public void UseObject(int ID_Object, Button button_gO = null){
+
+    public string GetNameVehicle(int ID)
+    {
+        return vehicles[ID - 1].name_text;
+    }
+
+    public GameObject GetImageVehicle(int ID)
+    {
+        return images_vehicles[vehicles[ID - 1].image_index];
+
+    }
+
+    public GameObject GetImageVehicleInGame(int ID)
+    {
+        return images_vehicles_inGame[vehicles[ID - 1].image_index];
+
+    }
+
+    public GameObject InstantiateObject(int ID, GameObject parent, int q = 0) {
+        GameObject objectPrefab = Instantiate(GetImageObject(ID), transform.position, Quaternion.identity);
+        objectPrefab.transform.SetParent(parent.transform, false);
+        if (q > 0)
+        {
+            objectPrefab.transform.GetChild(0).gameObject.SetActive(true);
+            objectPrefab.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "x" + q.ToString();
+        }
+        else{ 
+            objectPrefab.transform.GetChild(0).gameObject.SetActive(false);
+            objectPrefab.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
+        }
+        return objectPrefab;
+    }
+
+    public GameObject InstantiateVehicle(int ID, GameObject parent)
+    {
+        GameObject objectPrefab = Instantiate(GetImageVehicle(ID), transform.position, Quaternion.identity);
+        objectPrefab.transform.SetParent(parent.transform, false);
+        return objectPrefab;
+    }
+
+    public GameObject InstantiateVehicleInGame(int ID, GameObject parent)
+    {
+        GameObject objectPrefab = Instantiate(GetImageVehicleInGame(ID), transform.position, Quaternion.identity);
+        objectPrefab.transform.SetParent(parent.transform, false);
+        return objectPrefab;
+    }
+
+    public GameObject InstantiateCarrotObject(GameObject parent, int q = 0)
+    {
+        GameObject objectPrefab = Instantiate(DefaultCarrots, transform.position, Quaternion.identity);
+        objectPrefab.transform.SetParent(parent.transform, false);
+        if (q > 0)
+        {
+            objectPrefab.transform.GetChild(0).gameObject.SetActive(true);
+            objectPrefab.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "x" + q.ToString();
+        }
+        else
+        {
+            objectPrefab.transform.GetChild(0).gameObject.SetActive(false);
+            objectPrefab.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
+        }
+        return objectPrefab;
+    }
+
+    public int GetCostObject(int ID, OType type)
+    {
+        int cost = 0;
+        if (type == OType.Boost)
+            cost = ObjectsManager.ObjectsM.objects[ID - 1].cost_shop;
+        else if (type == OType.Vehicle)
+            cost = ObjectsManager.ObjectsM.vehicles[ID - 1].cost_shop;
+        return cost;
+    }
+
+    public int GetLimitObject(int ID, OType type)
+    {
+        int limit = 0;
+        if (type == OType.Boost)
+            limit = ObjectsManager.ObjectsM.objects[ID - 1].limit;
+        else if (type == OType.Vehicle)
+            limit = ObjectsManager.ObjectsM.vehicles[ID - 1].limit;
+        return limit;
+    }
+
+    // Sistema que permite el uso de los objetos en el juego.
+    public void UseObject(int ID_Object, Button button_gO = null){
 		if (button_gO != null) {
 			button_gO.interactable = false;
 		}
@@ -53,8 +152,8 @@ public class ObjectsManager : MonoBehaviour {
 		} else if (ID_Object == 3) {
 			StartCoroutine (activeExtraVelocity(button_gO));
 		}
-
-	}
+        RewardSystem.RewardS.CalculateObjects(ID_Object, -1, OType.Boost);
+    }
 
 	//OBJETO: Shield
 	public IEnumerator activeShieldBunny(Button button = null){
@@ -150,4 +249,13 @@ public class ObjectsManager : MonoBehaviour {
 	}
 
 
+}
+
+namespace ObjectType
+{
+    public enum OType
+    {
+        Boost,
+        Vehicle,
+    }
 }

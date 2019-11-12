@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AttractEffect : MonoBehaviour {
-	public float speed = 5f;
-	public float rotateSpeed = 200f;
-	public GameObject target;
+
+	private GameObject target;
 	private Rigidbody2D rb;
+	[SerializeField]
+	private float speed = 5f;
+	[SerializeField]
+	private float rotateSpeed = 200f;
 
 	// Use this for initialization
 	void Start () {
@@ -26,8 +29,10 @@ public class AttractEffect : MonoBehaviour {
 	}
 
 	void OnTriggerEnter2D (Collider2D collider){
+		
 		if (collider.gameObject.tag == "magnetic_area" && GameManager.GameM.CurrentObject.Contains(2)) {
 			target = collider.gameObject;
 		}
+
 	}
 }

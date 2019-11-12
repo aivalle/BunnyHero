@@ -83,7 +83,6 @@ public class CloudGenerator : MonoBehaviour {
 	
 	void FixedUpdate () 
 	{    
-		
 		GenerateObjectsIfRequired();
 	}
 }

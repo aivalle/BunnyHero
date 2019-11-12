@@ -44,8 +44,14 @@ public class Serializer : MonoBehaviour
 			UserInfo.UserI.LastFuelTimer = DateTime.ParseExact(copy["LastFuelTimer"].ToString(),"d/M/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
 			UserInfo.UserI.objects = ObjectToDictionary(copy ["objects"]);
+            UserInfo.UserI.vehicles = ObjectToDictionary(copy["vehicles"]);
+            
+                object tryN;
+                copy.TryGetValue("bunny", out tryN);
 
-			Debug.Log ("Datos obtenidos");
+            UserInfo.UserI.bunny = ObjectToDictionary2(tryN);
+
+                Debug.Log ("Datos obtenidos");
 			}catch(Exception ex) {
 				FirstReward ();
 				SaveInfo ();
@@ -56,11 +62,13 @@ public class Serializer : MonoBehaviour
 		}
 	}
 
+
 	public void FirstReward(){
 		UserInfo.UserI.carrots = 50;
 		UserInfo.UserI.fuelGame = 3;
 		UserInfo.UserI.exp = 0;
 		UserInfo.UserI.LastFuelTimer = DateTime.UtcNow;
+        //RewardSystem.RewardS.CalculateObjects(1, 1, ObjectType.OType.Vehicle);
 	}
 
 	public void SaveInfo(){
@@ -74,8 +82,10 @@ public class Serializer : MonoBehaviour
 		dict.Add ("fuelGame", UserInfo.UserI.fuelGame);
 		dict.Add ("LastFuelTimer", UserInfo.UserI.LastFuelTimer.ToString(format));
 		dict.Add ("objects", UserInfo.UserI.objects);
+        dict.Add("vehicles", UserInfo.UserI.vehicles);
+        dict.Add("bunny", UserInfo.UserI.bunny);
 
-		string json = Json.Serialize(dict);
+        string json = Json.Serialize(dict);
 
 		Debug.Log (json);
 		Rijndael crypto = new Rijndael();
@@ -126,20 +136,40 @@ public class Serializer : MonoBehaviour
 		}
 	}
 
+    public static Dictionary<string, object> ObjectToDictionary2(object obj)
+    {
+        if (typeof(IDictionary).IsAssignableFrom(obj.GetType()))
+        {
+            IDictionary idict = (IDictionary)obj;
 
-	public static Dictionary<int, Dictionary<int,Dictionary<string,object>>> ObjectToDictionaryAdvance(object obj)
+            Dictionary<string, object> newDict = new Dictionary<string, object>();
+            foreach (object key in idict.Keys)
+            {
+                newDict.Add(key.ToString(), idict[key]);
+            }
+            return newDict;
+        }
+        else
+        {
+            Debug.LogError("Object is not dictionary.");
+            return null;
+        }
+    }
+
+
+    public static Dictionary<int, Dictionary<string,Dictionary<string,object>>> ObjectToDictionaryAdvance(object obj)
 	{
 		if (typeof(IDictionary).IsAssignableFrom(obj.GetType()))
 		{
 			IDictionary idict = (IDictionary)obj;
 
-			Dictionary<int, Dictionary<int,Dictionary<string,object>>> newDict = new Dictionary<int, Dictionary<int,Dictionary<string,object>>>();
+			Dictionary<int, Dictionary<string,Dictionary<string,object>>> newDict = new Dictionary<int, Dictionary<string,Dictionary<string,object>>>();
 
 			foreach (string key in idict.Keys)//Recorre mundos
 			{
 				IDictionary copy =  (IDictionary)idict[key];
 
-				Dictionary<int,Dictionary<string,object>> newL = new Dictionary<int,Dictionary<string,object>>();
+				Dictionary<string,Dictionary<string,object>> newL = new Dictionary<string,Dictionary<string,object>>();
 
 				foreach (string key2 in copy.Keys) //Recorre ID
 				{
@@ -151,7 +181,7 @@ public class Serializer : MonoBehaviour
 						newL2.Add (key3, copy2[key3]);
 					}
 
-					newL.Add (Int32.Parse(key2), newL2);
+					newL.Add (key2, newL2);
 				}
 
 				newDict.Add(Int32.Parse(key), newL);
@@ -176,7 +206,7 @@ public class SaveData
 	public int carrots;
 	public int fuelGame;
 	public int exp;
-	public Dictionary<int, Dictionary<int,Dictionary<string,object>>> missionsComplete = new Dictionary<int, Dictionary<int,Dictionary<string,object>>>();
+	public Dictionary<int, Dictionary<string,Dictionary<string,object>>> missionsComplete = new Dictionary<int, Dictionary<string,Dictionary<string,object>>>();
 	public string LastFuelTimer;
 	public Dictionary<string,int> objects = new Dictionary<string,int>();
 }

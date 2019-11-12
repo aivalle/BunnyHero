@@ -82,7 +82,7 @@ public class ProjectileDragging : MonoBehaviour {
 				LineRendererUpdate ();
 	
 			} else {
-				if (GameManager.GameM.RunGame == false && GameManager.GameM.StartGame == true) {
+				if (!GameManager.GameM.RunGame && GameManager.GameM.StartGame) {
 				
 					catapultLineFront.enabled = false;
 					catapultLineBack.enabled = false;
@@ -112,8 +112,8 @@ public class ProjectileDragging : MonoBehaviour {
 	}
 	
 void OnMouseDown () {
-		if (GameManager.GameM.RunGame == false || GameManager.GameM.EndGame == true) {
-			if (!EventSystem.current.IsPointerOverGameObject () && GameManager.GameM.StartGame == true) {
+		if (!GameManager.GameM.RunGame || GameManager.GameM.EndGame) {
+			if (!EventSystem.current.IsPointerOverGameObject() && GameManager.GameM.StartGame) {
 				spring.enabled = false;
 				clickedOn = true;
 			}
@@ -121,8 +121,8 @@ void OnMouseDown () {
 }
 	
 void OnMouseUp () {
-		if (GameManager.GameM.RunGame == false || GameManager.GameM.EndGame == true) {
-			if (!EventSystem.current.IsPointerOverGameObject () && GameManager.GameM.StartGame == true) {
+		if (!GameManager.GameM.RunGame || GameManager.GameM.EndGame) {
+			if (!EventSystem.current.IsPointerOverGameObject () && GameManager.GameM.StartGame) {
 				spring.enabled = true;
 				rb.isKinematic = false;
 				clickedOn = false;

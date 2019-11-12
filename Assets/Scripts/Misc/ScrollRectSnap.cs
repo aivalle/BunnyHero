@@ -6,79 +6,107 @@ using UnityEngine.UI;
 
 public class ScrollRectSnap : MonoBehaviour {
 
-	//public static ScrollRectSnap ScrollRectS;
-	public RectTransform panel;
-	public GameObject[] bttn;
-	public RectTransform center;
-	public bool work;
-	public bool stop;
+    public RectTransform ScrollPanel, CenterOfCard;
+    public GameObject[] AllButtons;
 
-	public float[] distance;
-	private bool dragging = false;
-	public int bttnDistance;
-	public int minButtnNum;
+    public RectTransform[] buttonRTs;
+    private RectTransform centerRT;
+    public float[] distances; // buttons distance to the center
+    private bool isDragging = false;
+    public int buttonDistance; // distance between buttons
+    private int minButtonNum; // kepe track of the button closest to center
+    private bool targetNearestButton = true;
+    public bool work = false;
 
-	void Awake () {
-		//ScrollRectS = this;
-	}
+    public void WorkNow()
+    {
+        distances = new float[AllButtons.Length];
 
+        buttonRTs = new RectTransform[AllButtons.Length];
+        for (int i = 0; i < buttonRTs.Length; i++)
+        {
+            buttonRTs[i] = AllButtons[i].GetComponent<RectTransform>();
+        }
+        centerRT = CenterOfCard.GetComponent<RectTransform>();
 
-	public void WorkNow(){
-		work = true;
-		int bttnLenght = bttn.Length;
-		distance = new float[bttnLenght];
-		//Get distance between buttons
-		bttnDistance = (int)Mathf.Abs(bttn[1].GetComponent<RectTransform>().anchoredPosition.x - bttn[0].GetComponent<RectTransform>().anchoredPosition.x);
+        // get distance between buttons
+        buttonDistance = (int)Mathf.Abs(buttonRTs[1].anchoredPosition.x - buttonRTs[0].anchoredPosition.x); // this assumes the buttons start with 0 centered
+        //Debug.Log(buttonDistance);
+        work = true;
+    }
 
-	}
+    private float distReposition, curX, curY;
+    private Vector2 newPos;
+    private void Update()
+    {
+        if (work)
+        {
+            for (int i = 0; i < AllButtons.Length; i++)
+            {
+                distReposition = CenterOfCard.transform.position.x - AllButtons[i].transform.position.x;
+                distances[i] = Mathf.Abs(distReposition);
 
-	void Update(){
-		if(work == true){
-			bttnDistance = (int)Mathf.Abs(bttn[1].GetComponent<RectTransform>().anchoredPosition.x - bttn[0].GetComponent<RectTransform>().anchoredPosition.x);
+                if (distReposition > 1000)
+                {
+                    curX = buttonRTs[i].anchoredPosition.x;
+                    curY = buttonRTs[i].anchoredPosition.y;
+                    newPos = new Vector2(curX + (AllButtons.Length * buttonDistance), curY);
+                    buttonRTs[i].anchoredPosition = newPos;
+                }
 
-				//Define distances between center and all buttons
-				for (int i = 0; i < bttn.Length; i++) {
-					distance [i] = Mathf.Abs (center.transform.position.x - bttn [i].transform.position.x);	
-				}
-				//Define which button is in center
-				float minDistance = Mathf.Min (distance);
-			if (stop == false) {	
-				for (int a = 0; a < bttn.Length; a++) {
-					if (minDistance == distance [a]) {
-						minButtnNum = a;
-					}
-				}
-			}
-				//If the user isn't dragging, center the most near button
-				if (!dragging) {
-					LerpToBttn (minButtnNum * -bttnDistance);
-				}
-			
-		}
-	}
+                if (distReposition < -1000)
+                {
+                    curX = buttonRTs[i].anchoredPosition.x;
+                    curY = buttonRTs[i].anchoredPosition.y;
+                    newPos = new Vector2(curX - (AllButtons.Length * buttonDistance), curY);
+                    buttonRTs[i].anchoredPosition = newPos;
+                }
+            }
 
-	void LerpToBttn(int position){
-		float newX = Mathf.Lerp (panel.anchoredPosition.x, position, Time.deltaTime * 10f);
-		Vector2 newPosition = new Vector2 (newX, panel.anchoredPosition.y);
-		panel.anchoredPosition = newPosition;
-	} 
+            if (targetNearestButton)
+            {
+                float minDistance = Mathf.Min(distances);
 
-	public void StartDrag(){
-		dragging = true;
-	}
+                for (int i = 0; i < distances.Length; i++)
+                {
+                    if (minDistance == distances[i])
+                    {
+                        minButtonNum = i;
+                    }
+                }
+            }
 
-	public void EndDrag(){
-		dragging = false;
-	}
+            if (!isDragging) // not dragging
+            {
+                if(minButtonNum < buttonRTs.Length)
+                LerpToButton(-buttonRTs[minButtonNum].anchoredPosition.x);
+                //LerpToButton(minButtonNum * -buttonDistance);
+            }
+        }
+    }
 
-	public void Gotobutton(int index){
-		StartCoroutine( GoToPosition(index));
-	}
+    void LerpToButton(float position)
+    {
+        float newX = Mathf.Lerp(ScrollPanel.anchoredPosition.x, position, Time.deltaTime * 10f);
+        Vector2 newPos = new Vector2(newX, ScrollPanel.anchoredPosition.y);
+        ScrollPanel.anchoredPosition = newPos;
+    }
 
-	IEnumerator GoToPosition(int index){
-		stop = true;
-		minButtnNum = index;
-		yield return new WaitForSeconds(1f);
-		stop = false;
-	}
+    public void StartDrag()
+    {
+        isDragging = true;
+
+        targetNearestButton = true;
+    }
+
+    public void EndDrag()
+    {
+        isDragging = false;
+    }
+
+    public void GoToButton(int bIndex)
+    {
+        targetNearestButton = false;
+        minButtonNum = bIndex;
+    }
 }

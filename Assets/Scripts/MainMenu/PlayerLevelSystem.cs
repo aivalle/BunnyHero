@@ -48,7 +48,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 		if(StartVisibility)
 			ActivateUIEXP (true);
 		else
-			ActivateUIEXP (false);
+			ActivateUIEXP (false, false);
 		
 	}
 
@@ -86,7 +86,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 			oldLevel = aLevel [0];
 			newLevel = nLevel [0];
 		}
-		if (UIEXPEnable == false)
+		if (!UIEXPEnable)
 			ActivateUIEXP (true);
 	}
 
@@ -163,8 +163,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 
 				UIRewardPrefab1.transform.SetParent (LevelUpUI.transform.GetChild (4).gameObject.transform, false);
 				UIRewardPrefab1.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
-				UIRewardPrefab1.transform.GetChild (0).GetComponent<Image> ().sprite = CarrotImg;
-				UIRewardPrefab1.transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = reward.Value.ToString();
+                ObjectsManager.ObjectsM.InstantiateCarrotObject(UIRewardPrefab1, int.Parse(reward.Value.ToString()));
 
 				break;
 			case "booster":
@@ -174,8 +173,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 
 					UIRewardPrefab2.transform.SetParent (LevelUpUI.transform.GetChild (4).gameObject.transform,false);
 					UIRewardPrefab2.transform.localScale = new Vector3 (1.0f, 1.0f, 0.0f);
-					UIRewardPrefab2.transform.GetChild (0).GetComponent<Image> ().sprite = ObjectsManager.ObjectsM.GetImageObject(booster.Key);
-					UIRewardPrefab2.transform.GetChild (1).GetComponent<TextMeshProUGUI> ().text = booster.Value.ToString();
+                    ObjectsManager.ObjectsM.InstantiateObject(booster.Key, UIRewardPrefab2, booster.Value);
 				}
 				break;
 			}
@@ -192,7 +190,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 	IEnumerator StartModif(){
 
 		yield return new WaitForSeconds(1.5f);
-		if (UpdateExp == false) {
+		if (!UpdateExp) {
 			SoundManager.SoundM.StartAudioEXP (EXPSound, 1.0f);
 		}
 		UpdateExp = true;
@@ -202,7 +200,7 @@ public class PlayerLevelSystem : MonoBehaviour {
 		List<double> infoExp;
 		List<double> infoExp2;
 		infoExp = CalculateLevel(ActualEXP);
-		if (effects == true) {
+		if (effects) {
 			infoExp2 = CalculateLevel(Convert.ToInt32 (newEXP));
 			if (newEXP < ActualEXP) {
 
@@ -249,15 +247,18 @@ public class PlayerLevelSystem : MonoBehaviour {
 		
 	}
 
-	public void ActivateUIEXP(bool opc){
+	public void ActivateUIEXP(bool opc, bool show = true){
 		if (opc) {
 			UIEXP ["UIEXP"].speed = -1;
 			UIEXP["UIEXP"].time = UIEXP ["UIEXP"].length;
 			UIEXP.Play ("UIEXP");
 			UIEXPEnable = true;
 		} else {
-			UIEXP ["UIEXP"].speed = 1;
-			UIEXP ["UIEXP"].time = 0.0f;
+            UIEXP["UIEXP"].speed = 1;
+            if (show)
+                UIEXP["UIEXP"].time = 0.0f;
+            else
+                UIEXP["UIEXP"].time = UIEXP["UIEXP"].length;
 			UIEXP.Play ("UIEXP");
 			UIEXPEnable = false;
 		}
@@ -266,9 +267,8 @@ public class PlayerLevelSystem : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (UpdateExp == true) {
+		if (UpdateExp) {
 			UpdateLevel (true);
-
 		}
 	}
 }
